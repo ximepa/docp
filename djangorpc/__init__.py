@@ -4,7 +4,6 @@ from .responses import *
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.utils import simplejson
-from django.db.models.query import QuerySet
 from inspect import getargspec
 
 
@@ -20,7 +19,7 @@ class RpcRouter(object):
         :param url: URL pattern name or something you can pass to ``reverse``.
             Used to get URL which router is connected.
         :param actions: Action classes router should add to RPC API
-        :param enable_buffer: Define client should send requests in a butch
+        :param enable_buffer: Define client should send requests in a batch
         """
         self.url = url
         self.actions = actions
@@ -111,16 +110,9 @@ class RpcRouter(object):
     def execute_func(self, func, *args, **kwargs):
         if hasattr(func, '_pre_execute'):
             result = func._pre_execute(func, *args, **kwargs)
-
             if result is not None:
                 return result
-
-        result = func(*args, **kwargs)
-
-        if isinstance(result, QuerySet):
-            result = [obj.store_record() for obj in result]
-
-        return result
+        return func(*args, **kwargs)
 
     def call_action(self, rd, request, *args, **kwargs):
         """
@@ -163,7 +155,8 @@ class RpcRouter(object):
         extra_kwargs.update(self.method_extra_kwargs(func, request, *args, **kwargs))
 
         func_args, varargs, varkw, func_defaults = getargspec(func)
-        func_args.remove('self')  # TODO: or cls for classmethod
+        if 'self' in func_args:
+            func_args.remove('self')  # TODO: or cls for classmethod
         for name in extra_kwargs.keys():
             if name in func_args:
                 func_args.remove(name)

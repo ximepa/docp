@@ -2,7 +2,7 @@
 __author__ = 'maxim'
 
 # -*- encoding: utf-8 -*-
-from rpc import Error, Msg, RpcHttpResponse
+from djangorpc import Error, Msg, RpcHttpResponse
 from django.template.loader import render_to_string
 from django.utils.translation import ugettext as _
 from datetime import datetime

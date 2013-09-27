@@ -9,16 +9,61 @@
     <script type='text/javascript' src='{% static 'js/jquery.util.js' %}'></script>
     <script type='text/javascript' src='{% static 'js/jquery.form.js' %}'></script>
     <script type='text/javascript' src='{% static 'js/jquery.rpc.js' %}'></script>
+    <script type='text/javascript' src='{% static 'js/ajax-csrf.js' %}'></script>
+    <script type='text/javascript' src='{% url 'api' %}'></script>
 {% endblock %}
 {% block scripts %}
 <script language="javascript">
 
     $(document).ready(function() {
 
-        var date = new Date();
-		var d = date.getDate();
-		var m = date.getMonth();
-		var y = date.getFullYear();
+        var event_form = {
+                ajax_init: function () {
+                    $('#rpc-event-set-js').ajaxForm({
+                        type: 'RPC',
+                        api: {
+                            submit: CalendarApi.events_set
+                        },
+                        success: function (data, rpc_response, $form) {
+                            if (data.success) {
+                                $('#calendar').fullCalendar('refetchEvents');
+                                $('#add-event-popup').modal('hide');
+                            } else {
+
+                            }
+                        },
+                        error: function (data, rpc_response, $form) {
+
+                        },
+                        beforeSubmit: function (formData, $form, options) {
+
+                        }
+                    });
+                },
+                rollback: null
+            };
+
+        var calendar = {
+            events_get: function(start, end, callback) {
+                CalendarApi.events_get(start, end, function(data) {
+                    callback(data);
+                });
+            },
+
+            events_update_form: function (event, start, end) {
+                if (!event) {
+                    // new slot creation. calendar select event
+                    $("#event_start").val($.fullCalendar.formatDate(start, "yyyy-MM-dd HH:mm:ss"));
+                    $("#event_end").val($.fullCalendar.formatDate(end, "yyyy-MM-dd HH:mm:ss"));
+                    $("#event_instance_id").val('');
+                } else {
+                    // slot update. calendar eventClick event
+                    $("#event_start").val($.fullCalendar.formatDate(event.start, "yyyy-MM-dd HH:mm:ss"));
+                    $("#event_end").val($.fullCalendar.formatDate(event.end, "yyyy-MM-dd HH:mm:ss"));
+                    $("#event_instance_id").val(event.id);
+                }
+            }
+        };
 
         $('#calendar').fullCalendar({
             header: {
@@ -26,62 +71,39 @@
                 center: 'title',
                 right: 'month,basicWeek,basicDay'
             },
-            defaultView: 'month',
+            defaultView: 'basicWeek',
             aspectRatio: 1.4,
             weekends: true,
             firstDay: 1,
             editable: true,
-            events: [
-				{
-					title: 'All Day Event',
-					start: new Date(y, m, 1)
-				},
-				{
-					title: 'Long Event',
-					start: new Date(y, m, 1)
-				},
-				{
-					id: 999,
-					title: 'Repeating Event',
-					start: new Date(y, m, d-3, 16, 0),
-					allDay: false
-				},
-				{
-					id: 999,
-					title: 'Repeating Event',
-					start: new Date(y, m, d+4, 16, 0),
-					allDay: false
-				},
-				{
-					title: 'Meeting',
-					start: new Date(y, m, d, 10, 30),
-					allDay: false
-				},
-				{
-					title: 'Lunch',
-					start: new Date(y, m, d, 12, 0),
-					end: new Date(y, m, d, 14, 0),
-					allDay: false
-				},
-				{
-					title: 'Birthday Party',
-					start: new Date(y, m, d+1, 19, 0),
-					end: new Date(y, m, d+1, 22, 30),
-					allDay: false
-				},
-				{
-					title: 'Click for Google',
-					start: new Date(y, m, 28),
-					end: new Date(y, m, 29),
-					url: 'http://google.com/'
-				}
-			]
-        })
+            events: function(start, end, callback){
+                CalendarApi.events_get(start, end, callback);
+            },
+            eventRender: function (event, element, view) {
+            },
+            eventDrop: function (event, dayDelta, minuteDelta, allDay, revertFunc, jsEvent, ui, view) {
+                calendar.events_update_form(event);
+                $('#rpc-event-set-js').submit();
+            },
+            eventResize: function (event, dayDelta, minuteDelta, revertFunc, jsEvent, ui, view) {
+                calendar.events_update_form(event);
+                $('#rpc-event-set-js').submit();
+            },
+            eventClick: function(calEvent, jsEvent, view) {
+                $('#add-event-popup').modal('show');
+                calendar.events_update_form(calEvent);
+            }
+        });
+
+        console.log('ajax init')
+        event_form.ajax_init();
+        console.log('ajax init ok')
 
     });
 </script>
 {% endblock %}
 {% block content %}
+    {% csrf_token %}
     <div class="row">
         <div class="col-xs-10 col-md-8 col-xs-offset-8 col-md-offset-2">
             <h1>Виберіть пунк для перегляду</h1>
@@ -89,4 +111,24 @@
             <div id='calendar'></div>
         </div>
     </div>
+{% endblock %}
+
+{% block modals %}
+    {{ super }}
+        <div class="modal hide fade add-event-popup" id="add-event-popup">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h3>Add event</h3>
+            </div>
+            <form id="rpc-event-set-js">{% csrf_token %}
+            <input type="hidden" name="start" id="event_start">
+            <input type="hidden" name="end" id="event_end">
+            <input type="hidden" name="instance_id" id="event_instance_id">
+            <div class="modal-footer">
+                <button class="btn btn-info bt-submit-popup" title="Save">Save</button>
+                <a class="btn bt-close-popup" title="Cancel">Cancel</a>
+                <a class="btn btn-danger delete-action" title="Delete">Delete</a>
+            </div>
+            </form>
+        </div>
 {% endblock %}

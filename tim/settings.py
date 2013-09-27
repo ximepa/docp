@@ -24,9 +24,9 @@ ALLOWED_HOSTS = []
 # In a Windows environment this must be set to your system time zone.
 TIME_ZONE = 'Europe/Kiev'
 
-DATE_FORMAT = 'Y-m-d'
-DATETIME_FORMAT = 'Y-m-d H:m:s'
-DATETIME_INPUT_FORMATS = 'Y-m-d H:M:S'
+#DATE_FORMAT = 'Y-m-d'
+#DATETIME_FORMAT = 'Y-m-d H:m:s'
+#DATETIME_INPUT_FORMATS = 'Y-m-d H:M:S'
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
@@ -136,6 +136,7 @@ INSTALLED_APPS = (
     'daterange_filter',
     'options',
     'claim',
+    'planning',
 )
 
 # A sample logging configuration. The only tangible logging

@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 __author__ = 'maxim'
 
-from rpc import RpcRouter, Error, Msg, RpcHttpResponse
+from djangorpc import RpcRouter, Error, Msg, RpcHttpResponse
 from .actions import MainApiClass
 from planning.actions import CalendarApiClass
 
