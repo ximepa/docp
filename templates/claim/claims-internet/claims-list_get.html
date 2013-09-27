@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+{% load static_pages %}
+{% load staticfiles %}
+{% block extra_head %}
+    <link href="{% static 'claim/css/bootstrap-select.css' %}" rel="stylesheet">
+    <script type="text/javascript" src="{% static 'claim/js/bootstrap-select.js' %}"></script>
+{% endblock %}
+{% block scripts %}
+<script language="javascript">
+    $(document).ready(function() {
+
+        $.fn.serializeObject = function() {
+            var o = {};
+            var a = this.serializeArray();
+            $.each(a, function() {
+                if (o[this.name] !== undefined) {
+                    if (!o[this.name].push) {
+                        o[this.name] = [o[this.name]];
+                    }
+                    o[this.name].push(this.value || '');
+                } else {
+                    o[this.name] = this.value || '';
+                }
+            });
+            return o;
+        };
+
+        $(".dropdown-menu").on("click", "li", function(e){
+            e.stopPropagation();
+        });
+
+        $("#filter-submit").on('click', function(e) {
+            var params = location.search.substring(1);
+            var $form = $(this).closest('form');
+            var form_obj = $form.serializeObject();
+            if(params.length) {
+                var params_obj = JSON.parse('{"' + decodeURI(params).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"') + '"}');
+                for (var attrname in params_obj) {
+                    if(attrname.indexOf('[]')>=0) {
+                        delete params_obj[attrname];
+                    }
+                }
+                for (var attrname in form_obj) {
+                    if(typeof(params_obj[attrname]) !== undefined) {
+                        params_obj[attrname] = form_obj[attrname];
+                    }
+                }
+                document.location.search = $.param(params_obj);
+            } else {
+                document.location.search = $.param(form_obj);
+            }
+        });
+
+        $('.selectpicker').selectpicker({
+            style: 'btn-primary',
+            size: 4
+          });
+
+    });
+</script>
+{% endblock %}
+{% block content %}
+    <div class="row">
+        <div class="col-xs-14 col-md-11">
+            <div class="well well-sm">
+                asd
+            </div>
+        </div>
+        <div class="col-xs-3 col-md-1">
+            <div class="well well-sm">
+                <form method="GET" class="" id="filter_form">
+                  <!-- Button trigger modal -->
+                  <a data-toggle="modal" href="#myModal" class="btn btn-primary full-width btn-sm btn-lg">Фільтр</a>
+                  <!-- Modal -->
+                  <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                          <h4 class="modal-title">Фільтр</h4>
+                        </div>
+                        <div class="modal-body">
+                                <div class="btn-toolbar">
+                                  <div class="btn-group">
+                                      <div class="control-group">
+                                        <label class="control-label">Статус</label>
+                                        <div class="controls">
+                                            {{ status_form.status }}
+                                        </div>
+                                      </div>
+                                  </div>
+                                  <div class="btn-group">
+                                      <div class="control-group">
+                                        <label class="control-label">Жалобщики</label>
+                                        <div class="controls">
+                                            {{ status_form.worker }}
+                                        </div>
+                                      </div>
+                                  </div>
+                                  <div class="btn-group"></div>
+                                </div>
+
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                          <button id="filter-submit" type="button" class="btn btn-primary">Save changes</button>
+                        </div>
+                      </div><!-- /.modal-content -->
+                    </div><!-- /.modal-dialog -->
+                  </div><!-- /.modal -->
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-18 col-md-12">
+            <table class="table table-hover table-striped">
+                <thead>
+                    <tr>
+                        {% table_header headers %}
+                    </tr>
+                </thead>
+                <tbody>
+                {% for claim in claims %}
+                    <tr>
+                        <td class="">{{ claim.id }}</td>
+                        <td class="">{{ claim.vyl }}</td>
+                        <td class="">{{ claim.kv }}</td>
+                        <td class="">{{ claim.login }}</td>
+                        <td class="">{{ claim.error }}</td>
+                        <td class="">{{ claim.who_give }}</td>
+                        <td class="">{{ claim.pub_date }}</td>
+                        {% if not claim.who_do %}
+                            <td class="">-</td>
+                            <td class="">-</td>
+                        {% else %}
+                            {% if claim.status == False %}
+                                <td class="">-</td>
+                            {% else %}
+                                <td class="">{{ claim.datetime }}</td>
+                            {% endif %}
+                            <td class="">{{ claim.date_give }}</td>
+                        {% endif %}
+                        <td class="">{{ claim.date_change }}</td>
+                        <td class="">
+                            {% if claim.who_do %}
+                                {{ claim.who_do }} -
+                                {% if claim.what_do %}
+                                    <a id="{{ claim.id }}" href="#" class="glyphicon glyphicon-new-window" data-toggle="popover" title="{{ claim.what_do }}" data-content=""></a>
+                                {% else %}
+                                    <a id="{{ claim.id }}" href="#" class="glyphicon glyphicon-new-window" data-toggle="popover" title="-" data-content=""></a>
+                                {% endif %}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td class="">{{ claim.same_claim }}</td>
+                        <td class="">{{ claim.line_type }}</td>
+                        <td class="">
+                                {% if claim.status == False %}
+                                    <span class="glyphicon glyphicon-remove-circle"></span>
+                                {% else %}
+                                    <span class="glyphicon glyphicon-ok-circle"></span>
+                                {% endif %}
+                                <span><a href="{{ claim.id }}" class="glyphicon glyphicon-edit"></a></span>
+                        </td>
+                    </tr>
+                    <script>
+                        $(function (){
+                            $('#{{ claim.id }}').tooltip('hide');
+                        });
+                    </script>
+                {% endfor %}
+                </tbody>
+
+                <tfoot>
+                    <tr>
+                        <td colspan="2">
+                            <div class="">
+                                <span class="step-links">
+                                    {% if claims.has_previous %}
+                                        {% if getparams_page %}
+                                            <a href="?page={{ claims.previous_page_number }}&{{ getparams_page }}">previous</a>
+                                        {% else %}
+                                            <a href="?page={{ claims.previous_page_number }}">previous</a>
+                                        {% endif %}
+                                    {% endif %}
+                                    <span class="current">
+                                        Page {{ claims.number }} of {{ claims.paginator.num_pages }}.
+                                    </span>
+                                    {% if claims.has_next %}
+                                        {% if getparams_page %}
+                                            <a href="?page={{ claims.next_page_number }}&{{ getparams_page }}">next</a>
+                                        {% else %}
+                                            <a href="?page={{ claims.next_page_number }}">next</a>
+                                        {% endif %}
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </td>
+                        <td colspan="12">
+                            {{ claims_count }}
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+{% endblock %}

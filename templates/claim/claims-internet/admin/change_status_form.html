@@ -1,0 +1,11 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<form action="" method="post">{% csrf_token %}
+    {{ form.as_p }}
+    <p>Працівник буде зазначений на слідуючі заявки:</p>
+    <ul>{{ items|unordered_list }}</ul>
+    <input type="hidden" name="action" value="change_status" />
+    <button type="submit" name="apply" class="btn btn-primary">Зберегти</button>
+</form>
+{% endblock %}

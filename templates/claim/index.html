@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="row">
+        <div class="col-xs-10 col-md-8 col-xs-offset-8 col-md-offset-2">
+            <h1>Виберіть пунк для перегляду</h1>
+            <div class="list-group">
+                <a href="{% url 'claim:claims_internet' %}" class="list-group-item">
+                    Заявки Інтернет
+                    <span class="glyphicon glyphicon-chevron-right"></span>
+                    <span class="badge">Невиконані - {{ claim_internet_count_sf }}</span>
+                    <span class="badge">Виконані - {{ claim_internet_count_st }}</span>
+                    <span class="badge">Всі - {{ claim_internet_count_all }}</span>
+                </a>
+                <a href="#" class="list-group-item">Заявки КТБ
+                    <span class="glyphicon glyphicon-chevron-right"></span>
+                    <span class="badge badge-primary">14</span>
+                </a>
+                <a href="{% url 'planning:index' %}" class="list-group-item">Планування підключок
+                    <span class="glyphicon glyphicon-chevron-right"></span>
+                    <span class="badge">5</span>
+                </a>
+            </div>
+        </div>
+    </div>
+{% endblock %}

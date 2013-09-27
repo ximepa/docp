@@ -1,0 +1,35 @@
+<!-- Static navbar -->
+    <div class="navbar navbar-default navbar-static-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Planner</a>
+        </div>
+        <div class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="{% url 'claim:index' %}"><i class="glyphicon glyphicon-home"></i> Home</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+
+          </ul>
+          {% if not user.is_authenticated %}
+          {% else %}
+          <ul class="nav navbar-nav navbar-right">
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" rel="popover" data-toggle="popover">Ви війшли як <b>{{ user }}</b> <b class="caret"></b></a>
+                <ul class="dropdown-menu" id="popover_content_wrapper">
+                    <li><a class="popover_links" href="/user/preferences"><i class="glyphicon glyphicon-cog"></i> Налаштування</a></li>
+                    <li><a class="popover_links" href="/help/support"><i class="glyphicon glyphicon-envelope"></i> Тех. підтримка</a></li>
+                    <li class="divider"></li>
+                    <li><a class="popover_links" href="{% url 'claim:logout' %}"><i class="glyphicon glyphicon-log-out"></i> Вихід</a></li>
+                </ul>
+            </li>
+          </ul>
+          {% endif %}
+        </div><!--/.nav-collapse -->
+      </div>
+    </div>

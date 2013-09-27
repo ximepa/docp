@@ -1,0 +1,28 @@
+{% if claims|length %}
+	<table>
+	<tr class='even'>
+		<td colspan="3" class="right">
+		<strong>Found {{ claims|length }} users</strong>
+		</td>
+	</tr>
+	{% for claim in claims %}
+	<tr class="{% cycle 'odd' 'even' %}">
+		<td><strong>{{ forloop.counter }}.</strong></td>
+		<td>
+		{{ claim.vyl }} {{ claim.kv }}<br/>
+		<span class="hint">{{ claim.login }}</span>
+		</td>
+		<td class="right">
+		<span class="hint">
+		Joined {{ claim.date_joined|timesince }} ago<br/>
+		Last logged in {{ claim.last_login|timesince }} ago
+		</span>
+		</td>
+	</tr>
+	{% endfor %}
+	</table>
+{% else %}
+	<div class="note">
+	Your search yielded no results
+	</div>
+{% endif %}
