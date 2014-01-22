@@ -12,9 +12,9 @@ from django import forms
 from django.db import models
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
+from south.modelsinspector import add_introspection_rules
+add_introspection_rules([], ["^claim.lib.TimedeltaField"])
 
-#Djangotools
-#from djangotools.utils.southutils import add_introspection_rules_from_baseclass
 
 SECS_PER_DAY=3600*24
 

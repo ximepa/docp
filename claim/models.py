@@ -22,6 +22,9 @@ class ClaimInternet(models.Model):
     comments = models.TextField(max_length=200, blank=True, null=True,  verbose_name='Коментарії')
     domtel = models.CharField(max_length=200, blank=True, null=True,  verbose_name='Домашній т.')
     mobtel = models.CharField(max_length=200, blank=True, null=True,  verbose_name='Мобільний т.')
+    planning_date_from = models.DateField(verbose_name='Date from', blank=True)
+    planning_time_from = models.TimeField(verbose_name='Time from', blank=True)
+    planning_time_to = models.TimeField(verbose_name='Time to', blank=True)
     claim_type = models.ForeignKey(Claim_type, verbose_name='Тип заявки', default=1)
     line_type = models.ForeignKey(Line_type, verbose_name='Тип лінії', default=1)
     same_claim = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name='Схожі заявки')
@@ -36,7 +39,7 @@ class ClaimInternet(models.Model):
 
     class Meta:
         ordering = ('-pub_date',)
-        verbose_name = 'Інтернет заявки'
+        verbose_name = u'Інтернет заявки'
         verbose_name_plural = u'Інтернет заявки'
 
     def save(self,*args, **kwargs):
@@ -62,11 +65,12 @@ class ClaimCtv(models.Model):
     error = models.ForeignKey(Error, verbose_name='Помилка')
     who_do = models.ForeignKey(Worker, blank=True, null=True, verbose_name='Виконавець')
     who_give = models.CharField(max_length=200, editable=False, verbose_name='Додав')
-    what_do = models.ForeignKey(PerformedWork, blank=True, null=True, verbose_name='Виконані роботи')
+    what_do = models.ManyToManyField(PerformedWork, blank=True, null=True, verbose_name=u'Виконані роботи')
     datetime = models.DateTimeField(verbose_name='Дата вик', auto_now_add = True)
     date_give = models.DateTimeField(verbose_name='Отримав', auto_now_add = True)
     date_change = TimedeltaField(verbose_name='Різниця', blank=True, null=True, )
     status = models.BooleanField(default=False, verbose_name='Виконана')
+    disclaimer = models.BooleanField(default=False, verbose_name='Відмова')
     importance = models.ForeignKey(Importance, verbose_name='Важливість', default=1)
     pub_date = models.DateTimeField(verbose_name='Дата створення', auto_now_add = True, editable=False, blank=True)
     comments = models.TextField(max_length=200, blank=True, null=True,  verbose_name='Коментарії')

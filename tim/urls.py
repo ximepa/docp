@@ -12,9 +12,12 @@ urlpatterns = patterns('',
     # Examples:
     # url(r'^$', 'tim.views.home', name='home'),
     # url(r'^tim/', include('tim.foo.urls')),
+    url(r'^redactor/', include('redactor.urls')),
     url(r'^planning/', include('planning.urls', 'planning')),
     url(r'^/login/$', login, {'template_name': 'login.html'},),
+    url(r'^', include('manual.urls', 'manual')),
     url(r'^', include('claim.urls', 'claim')),
+
 
 
     # Uncomment the admin/doc line below to enable admin documentation:

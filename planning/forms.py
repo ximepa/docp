@@ -4,10 +4,6 @@ from .models import PlanningConnections
 
 class PlanningConnectionsForm(forms.ModelForm):
 
-    start = forms.DateTimeField()
-    end = forms.DateTimeField()
-    vyl = forms.IntegerField(required=False)
-
     class Meta:
         model = PlanningConnections
 

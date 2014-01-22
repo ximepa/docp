@@ -1,15 +1,6 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
 {% load static_pages %}
-{% block extra_head %}
-    <link href="{% static 'claim/css/bootstrap-select.css' %}" rel="stylesheet">
-    <script type="text/javascript" src="{% static 'claim/js/bootstrap-select.js' %}"></script>
-    <style type="text/css">
-        .bootstrap-select.btn-group, .bootstrap-select.btn-group[class*="span"] {
-            margin-bottom: 0px;
-        }
-    </style>
-{% endblock %}
 {% block scripts %}
 <script language="javascript">
 
@@ -21,11 +12,6 @@
             this.checked = checked_status;
           });
         });
-
-        $('.selectpicker').selectpicker({
-            style: 'btn-primary btn-sm',
-            size: 4
-          });
 
     });
 </script>

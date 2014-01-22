@@ -16,17 +16,13 @@ DATABASE_ROUTERS = ['tim.dbrouter.MainDBRouter']
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = ['*']
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
 # In a Windows environment this must be set to your system time zone.
 TIME_ZONE = 'Europe/Kiev'
 
-#DATE_FORMAT = 'Y-m-d'
-#DATETIME_FORMAT = 'Y-m-d H:m:s'
-#DATETIME_INPUT_FORMATS = 'Y-m-d H:M:S'
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
@@ -40,7 +36,7 @@ USE_I18N = True
 
 # If you set this to False, Django will not format dates, numbers and
 # calendars according to the current locale.
-USE_L10N = False
+USE_L10N = True
 
 # If you set this to False, Django will not use timezone-aware datetimes.
 USE_TZ = False
@@ -77,7 +73,7 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    'dajaxice.finders.DajaxiceFinder',
+    #'dajaxice.finders.DajaxiceFinder',
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
@@ -88,7 +84,7 @@ SECRET_KEY = 'rq^ww-8qf)n3q9dw=*s1_otayx1w0#u$8g5e+0hyu%g=h@x#$l'
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-    'django.template.loaders.eggs.Loader',
+    #'django.template.loaders.eggs.Loader',
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
@@ -116,6 +112,9 @@ ROOT_URLCONF = 'tim.urls'
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'tim.wsgi.application'
 
+REDACTOR_OPTIONS = {'lang': 'ua', 'removeClasses': 'true',}
+REDACTOR_UPLOAD = 'uploads/'
+
 TEMPLATE_DIRS = (
     os.path.join(PROJECT_DIR, "../templates/claim/"),
     # here you can add another templates directory if you wish.
@@ -125,11 +124,10 @@ INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-    'django.contrib.sites',
+    #'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # Uncomment the next line to enable the admin:
-    'bootstrap_admin',
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
@@ -137,6 +135,8 @@ INSTALLED_APPS = (
     'options',
     'claim',
     'planning',
+    'manual',
+    'south',
 )
 
 # A sample logging configuration. The only tangible logging

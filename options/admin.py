@@ -36,8 +36,8 @@ class Work_typeAdmin(admin.ModelAdmin):
 
 class Claim_typeAdmin(admin.ModelAdmin):
     save_on_top = True
-    list_display = ('name', 'type')
-    fields = ('name', 'type')
+    list_display = ('name',)
+    fields = ('name',)
     class Media:
     #    css = {
     #        "all": ("my_styles.css",)

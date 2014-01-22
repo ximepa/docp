@@ -48,7 +48,7 @@ class House(models.Model):
 class Worker(models.Model):
     name = models.CharField(max_length=200, unique=True, verbose_name='Жалобщик', )
     is_active = models.BooleanField(default=False)
-    work_type = models.ForeignKey('Work_type', verbose_name='Тип поботи')
+    work_type = models.ForeignKey('Work_type', verbose_name='Тип роботи')
     notebook_ip = models.CharField(max_length=200, blank=True)
 
     def __unicode__(self):
@@ -123,7 +123,6 @@ class Line_type(models.Model):
 
 class Claim_type(models.Model):
     name = models.CharField(max_length=200,  verbose_name='Тип заявки', unique=True)
-    type = models.ForeignKey(Work_type, verbose_name='Тип')
 
     def __unicode__(self):
         return self.name

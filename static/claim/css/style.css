@@ -24,3 +24,18 @@ a.popover_links {
     margin-bottom: 0px;
     margin-top: -20px;
 }
+
+.list-group-item {
+    background-color: #FFFFFF;
+    border: 1px solid #DDDDDD;
+    display: block;
+    margin-bottom: -1px;
+    padding: 5px 10px;
+    position: relative;
+}
+
+.panel-default > .panel-heading {
+    color: rgb(51, 51, 51);
+    background-color: rgb(66, 139, 202);
+    border-color: rgb(221, 221, 221);
+}

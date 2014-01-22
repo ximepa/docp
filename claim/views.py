@@ -63,14 +63,8 @@ def claims_internet(request):
         search = request.session.get('search', request.session['search'])
         request.session['ot'] = request.GET.get('ot')
         ot = request.session.get('ot', request.session['ot'])
-        print request.session['ot']
-        print ot
-        print '---'
         request.session['o'] = request.GET.get('o')
         o = request.session.get('o', request.session['o'])
-        print request.session['o']
-        print o
-        print '---'
 
     getparams_headers = request.GET.copy()
     getparams_headers.pop('ot', None)

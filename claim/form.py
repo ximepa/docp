@@ -16,6 +16,7 @@ class ChangeCtvWorkerForm(forms.Form):
 class ChangeStatusForm(forms.Form):
     _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
     status = forms.BooleanField(label=u'Статус', required=False)
+    disclaimer = forms.BooleanField(label=u'Відмова', required=False)
     what_do = forms.CharField(max_length=200, label=u'Виконані роботи', required=False, widget=forms.Textarea(attrs={'size':'50'}))
 
 
@@ -46,3 +47,13 @@ class InternetFilterForm(forms.Form):
                                             widget=forms.Select(attrs={'class': 'selectpicker show-tick',}))
     search = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control input-lg'},))
     #page = forms.HiddenInput()
+
+
+class PrintFilterForm(forms.Form):
+    status = forms.ChoiceField(choices=STATUS_FILTER_CHOISES, initial='0', widget=forms.Select(attrs={'class': 'selectpicker'}),)
+    worker = forms.ModelChoiceField(queryset=Worker.objects.all().filter(is_active=True, work_type__name__icontains='Кабельне'),
+                                            widget=forms.Select(attrs={'class': 'selectpicker show-tick',}))
+
+
+
+

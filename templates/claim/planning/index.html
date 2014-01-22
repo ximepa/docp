@@ -5,7 +5,7 @@
     <link rel='stylesheet' type='text/css' href='{% static 'claim/css/fullcalendar/fullcalendar.css' %}' />
     <link rel='stylesheet' type='text/css' href='{% static 'claim/css/fullcalendar/fullcalendar.print.css' %}' />
     <script type='text/javascript' src='{% static 'claim/js/fullcalendar/fullcalendar.js' %}'></script>
-    <script type='text/javascript' src='{% static 'claim/js/fullcalendar/jquery-ui.custom.min.js' %}'></script>
+    <script type='text/javascript' src='{% static 'claim/js/fullcalendar/fullcalendar.min.js' %}'></script>
     <script type='text/javascript' src='{% static 'js/jquery.util.js' %}'></script>
     <script type='text/javascript' src='{% static 'js/jquery.form.js' %}'></script>
     <script type='text/javascript' src='{% static 'js/jquery.rpc.js' %}'></script>
@@ -14,8 +14,32 @@
 {% endblock %}
 {% block scripts %}
 <script language="javascript">
-
     $(document).ready(function() {
+
+        var form_errors_display = function (form, data) {
+            for (key in data.error) {
+                if (data.error.hasOwnProperty(key)) {
+                    var $field = $('input[name="' + key + '"], textarea[name="' + key + '"]', form);
+                    var error = '<p class="error_list">' + data.error[key] + '</p>';
+                    if ($field.length) {
+                        $field.before(error);
+                    } else {
+                        $('.global-errors', form).prepend(error);
+                    }
+                }
+            }
+        };
+
+        var form_clear_delete_action = function (form, data) {
+            $('input[name=action_delete]', form).remove();
+        };
+
+
+        $(".delete-action").live('click', function () {
+            var form = $(this).closest('form');
+            form.append('<input type="hidden" name="action_delete" value="1">');
+            form.submit();
+        });
 
         var event_form = {
                 ajax_init: function () {
@@ -69,11 +93,16 @@
             header: {
                 left: 'prev,next today tomorow',
                 center: 'title',
-                right: 'month,basicWeek,basicDay'
+                right: 'month,agendaWeek,agendaDay'
             },
-            defaultView: 'basicWeek',
+            selectable: true,
+{#            selectHelper: true,#}
+            select: function (start, end, allDay) {
+                $('#add-event-popup').modal('show');
+                calendar.events_update_form(null, start, end);
+            },
+            defaultView: 'agendaWeek',
             aspectRatio: 1.4,
-            weekends: true,
             firstDay: 1,
             editable: true,
             events: function(start, end, callback){
@@ -95,9 +124,11 @@
             }
         });
 
-        console.log('ajax init')
+        $('#add-event-popup .bt-submit-popup').click(function () {
+            $('#rpc-event-set-js').submit();
+        });
+
         event_form.ajax_init();
-        console.log('ajax init ok')
 
     });
 </script>
@@ -115,20 +146,28 @@
 
 {% block modals %}
     {{ super }}
-        <div class="modal hide fade add-event-popup" id="add-event-popup">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h3>Add event</h3>
+    <div class="modal fade add-event-popup" id="add-event-popup">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Event</h4>
+                </div>
+                <div class="modal-body">
+                    <form id="rpc-event-set-js">{% csrf_token %}
+                        {{ form }}
+                        <input type="hidden" name="start" id="event_start">
+                        <input type="hidden" name="end" id="event_end">
+                        <input type="hidden" name="instance_id" id="event_instance_id">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-info bt-submit-popup" title="Save">Save</button>
+                    <a class="btn bt-close-popup" title="Cancel">Cancel</a>
+                    <a class="btn btn-danger delete-action" title="Delete">Delete</a>
+                </div>
             </div>
-            <form id="rpc-event-set-js">{% csrf_token %}
-            <input type="hidden" name="start" id="event_start">
-            <input type="hidden" name="end" id="event_end">
-            <input type="hidden" name="instance_id" id="event_instance_id">
-            <div class="modal-footer">
-                <button class="btn btn-info bt-submit-popup" title="Save">Save</button>
-                <a class="btn bt-close-popup" title="Cancel">Cancel</a>
-                <a class="btn btn-danger delete-action" title="Delete">Delete</a>
-            </div>
-            </form>
         </div>
+    </div>
+
 {% endblock %}

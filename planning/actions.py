@@ -35,17 +35,9 @@ class CalendarApiClass(object):
                     response['success'] = True
                     response['msg'] = "deleted"
                     return response
-                print rdata
-                print event
-                dt = {
-                    'start': rdata.get('start',None),
-                    'end': rdata.get('end',None)
-                }
-                print dt
-                form = PlanningConnectionsForm(dt
-                , instance=event)
+                form = PlanningConnectionsForm(rdata, instance=event)
         else:
-            form = PlanningConnectionsForm(dict(rdata))
+            form = PlanningConnectionsForm(rdata)
         if form.is_valid():
             form.save()
             response = RpcHttpResponse()
