@@ -4,7 +4,7 @@ from django.template.context import RequestContext
 from django.http import HttpResponse
 from django.utils import simplejson
 from django.core.serializers.json import DjangoJSONEncoder
-from django.utils.functional import update_wrapper
+from functools import update_wrapper
 
 
 def render_to(template):

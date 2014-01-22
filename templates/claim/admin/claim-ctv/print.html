@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'claim/css/print.css' %}styles.css">
+{% endblock %}
+{% block content %}
+    <div class="row">
+        <div class="col-md-12">
+            <form method="get">
+                {{ print_form.status }}
+                {{ print_form.worker }}
+                <input type="submit" />
+            </form>
+        </div>
+        <div class="col-md-12">
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                    <tr>
+                        <td>
+                            Вулиця
+                        </td>
+                        <td>
+                            Кв.
+                        </td>
+                        <td>
+                            Дом. тел.
+                        </td>
+                        <td>
+                            Моб. тел.
+                        </td>
+                        <td>
+                            Помилка
+                        </td>
+                        <td>
+                            Група
+                        </td>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for claim in claims %}
+                    <tr>
+                        <td>
+                            {{ claim.vyl }}
+                        </td>
+                        <td>
+                            {{ claim.kv }}
+                        </td>
+                        <td>
+                            {{ claim.domtel }}
+                        </td>
+                        <td>
+                            {{ claim.mobtel }}
+                        </td>
+                        <td>
+                            {{ claim.error }}
+                        </td>
+                        <td>
+                            {{ claim.group }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+              </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}

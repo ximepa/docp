@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block extra_head %}
+
+{% endblock %}
+{% block content %}
+    <div class="row">
+        <div class="col-lg-6">
+        </div><!-- /.col-lg-6 -->
+        <div class="col-lg-6">
+            <form method="GET">
+                <div class="input-group">
+                    {{ filter_form.search }}
+                    <span class="input-group-btn">
+                        <button type="submit" class="btn btn-default" type="button">Go!</button>
+                    </span>
+                </div><!-- /input-group -->
+            </form>
+            <br>
+        </div><!-- /.col-lg-6 -->
+    </div><!-- /.row -->
+    <div class="row">
+        <div class="col-lg-12">
+            {% for group,val in manual_list_groups.items %}
+            <div class="panel-group" id="accordion">
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h4 class="panel-title">
+                    <a data-toggle="collapse" data-parent="#accordion" href="#collapse{{ group.pk }}">
+                      {{ group }}
+                    </a>
+                  </h4>
+                </div>
+                <div id="collapse{{ group.pk }}" class="panel-collapse collapse in">
+                  {% for manual in val %}
+                  <div class="panel-body">
+                    <a href="/manual/{{ manual.pk }}">
+                        {{ manual.name }} - {{ sensor }}
+                    </a>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+        {% if sensor == False%}
+            <script type="text/javascript">
+                $(function() {
+                    $(".collapse").collapse({
+                        toggle: true
+                    })
+                });
+            </script>
+        {% elif sensor == True %}
+            <script type="text/javascript">
+                $(function() {
+                    $(".collapse").collapse({
+                        toggle: false
+                    })
+                });
+            </script>
+        {% endif %}
+        </div><!-- /.col-lg-6 -->
+    </div><!-- /.row -->
+{% endblock %}

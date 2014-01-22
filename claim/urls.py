@@ -8,7 +8,7 @@ from django.contrib import admin
 admin.autodiscover()
 urlpatterns = patterns('claim.views',
     url(r'^claims_internet/$', 'claims_internet', name='claims_internet'),
-    #url( r'^search/$', 'ajax_claims_search', name='claims_search'),
+    url( r'^claims_list/$', 'claims_list', name = 'claims_list' ),
     url(r'^$', 'index', name='index'),
 )
 

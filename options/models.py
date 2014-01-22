@@ -14,6 +14,13 @@ class Dom(models.Model):
         self.sorting = "%s %s" % (self.vyl.name, self.house.num)
         super(Dom, self).save()
 
+    def get_json(self):
+        return {
+            'id': self.pk,
+            'sorting': self.sorting,
+        }
+
+
     class Meta:
         ordering = ('sorting',)
         verbose_name = u'дом'

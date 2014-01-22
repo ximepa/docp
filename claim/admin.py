@@ -8,9 +8,8 @@ from django.contrib.auth.models import User
 from django.shortcuts import HttpResponseRedirect, render
 from daterange_filter.filter import DateRangeFilter
 from django.contrib.admin.filters import RelatedFieldListFilter
-import xlsxwriter
 from django.contrib import messages
-from django.conf.urls.defaults import patterns
+#from django.conf.urls.defaults import patterns
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.template import RequestContext
@@ -680,13 +679,6 @@ class ClaimsCtvFilter(RelatedFieldListFilter):
 
 from django.contrib.auth.decorators import login_required
 class ClaimCtvAdmin(admin.ModelAdmin):
-
-    def get_urls(self):
-        urls = super(ClaimCtvAdmin, self).get_urls()
-        my_urls = patterns('',
-            (r'^print/$', self.claims_print)
-        )
-        return my_urls + urls
 
     def claims_print(self, request):
         from .form import PrintFilterForm

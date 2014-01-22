@@ -1,0 +1,26 @@
+.container {
+    max-width: 1500px;
+}
+
+.table {
+    border: #d4d4d4 solid 1px;
+}
+
+.full-width {
+    width: 100%;
+}
+body {
+    background: url("/static/claim/img/bg.png") repeat scroll 0% 0% transparent;
+}
+.navbar {
+    position: static;
+}
+
+a.popover_links {
+    color: #555555;
+}
+
+.well {
+    margin-bottom: 0px;
+    margin-top: -20px;
+}

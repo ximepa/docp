@@ -4,213 +4,172 @@
 {% block scripts %}
 <script language="javascript">
 
-    $(document).ready(function() {
+    $(document).ready(function () {
 
-        $("#select_all_checkbox").click(function(){
-          var checked_status = this.checked;
-          $("input[type='checkbox']").each(function(){
-            this.checked = checked_status;
-          });
+
+
+        $("#menu-sprites").kendoMenu({
+            dataSource: [{
+                    text: "Brazil", spriteCssClass: "brazilFlag", items: [
+                        { text: "History", spriteCssClass: "historyIcon" },
+                        { text: "Geography", spriteCssClass: "geographyIcon" },
+                    ]
+                },
+                {
+                    text: "India", spriteCssClass: "indiaFlag", items: [
+                        { text: "History", spriteCssClass: "historyIcon" },
+                        { text: "Geography", spriteCssClass: "geographyIcon" },
+                    ]
+                },
+                {
+                    text: "Netherlands", spriteCssClass: "netherlandsFlag", items: [
+                        { text: "History", spriteCssClass: "historyIcon" },
+                        { text: "Geography", spriteCssClass: "geographyIcon" },
+                    ]
+                }]
         });
 
+
+        var dataSource = new kendo.data.DataSource({
+            transport: {
+                read: function(options) {
+                    q = null;
+                    $.ajax({
+                        type: "GET",
+                        url: '{% url 'claim:claims_list' %}?q=' + q,
+                        contentType: "application/json; charset=utf-8",
+                        dataType: 'json',
+                        data: q,
+                        success: function(data) {
+                            options.success(data);
+                        }
+                    });
+                }
+            },
+            schema: {
+                model: {
+                    fields: {
+                        claim_id: { type: "number" },
+                        claim_vyl: { type: "number" },
+                        claim_kv: { type: "number" },
+                        claim_login: { type: "string" }
+                    }
+                }
+            },
+            pageSize: 30,
+            serverPaging: true,
+            serverFiltering: true,
+            serverSorting: true
+        });
+
+
+{#        var dataSource = new kendo.data.DataSource({#}
+{#            transport: {#}
+{#                read: function(options) {#}
+{#                    q = 1#}
+{#                    var url = '{% url 'claim:claims_list' %}?q=' + q;#}
+{#                    $.getJSON(url, function(data) {#}
+{#                        console.log(data);#}
+{#                        $.each(data, function() {#}
+{#                            $('#claim_id').val(this.claim_id);#}
+{#                            $('#claim_vyl').val(this.claim_vyl);#}
+{#                        })#}
+{#                    });#}
+{#                }#}
+{#            },#}
+{#            schema: {#}
+{#                model: {#}
+{#                    fields: {#}
+{#                        claim_id: { type: "number" },#}
+{#                        claim_vyl: { type: "number" },#}
+{#                        claim_kv: { type: "number" },#}
+{#                        claim_login: { type: "string" }#}
+{#                    }#}
+{#                }#}
+{#            },#}
+{#            pageSize: 30,#}
+{#            serverPaging: true,#}
+{#            serverFiltering: true,#}
+{#            serverSorting: true#}
+{#        });#}
+
+
+
+        $("#grid").kendoGrid({
+            dataSource: dataSource,
+            editable: "popup",
+            toolbar: ["create", "save", "cancel"],
+            //toolbar: kendo.template($("#template").html()),
+            height: 540,
+            sortable: {
+                mode: "multiple"
+            },
+            filterable: true,
+            columnMenu: true,
+            pageable: true,
+            columns: [ {
+                    field: "claim_id",
+                    title: "claim_id",
+                    width: 100
+                }, {
+                    field: "claim_vyl",
+                    title: "claim_vyl",
+                    width: 100
+                }, {
+                    field: "claim_kv",
+                    title: "claim_kv",
+                    width: 100
+                }, {
+                    field: "claim_login",
+                    filterable: false
+                }, { command: [{ name: "edit" }] }
+            ]
+        });
     });
 </script>
 {% endblock %}
 {% block content %}
-    <div class="row">
-        <div class="col-xs-18 col-md-12">
-                <nav class="navbar navbar-default" role="navigation">
-                  <!-- Brand and toggle get grouped for better mobile display -->
-                  <div class="navbar-header">
-                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
-                      <span class="sr-only">Toggle navigation</span>
-                      <span class="icon-bar"></span>
-                      <span class="icon-bar"></span>
-                      <span class="icon-bar"></span>
-                    </button>
-                    <a class="navbar-brand" href="#">Brand</a>
-                  </div>
-
-                  <!-- Collect the nav links, forms, and other content for toggling -->
-                  <div class="collapse navbar-collapse navbar-ex1-collapse">
-                    <ul class="nav navbar-nav">
-                      <li class=""></li>
-                      </li>
-                      <li>
-                          <div class="form-group">
-
-                          </div>
-                      </li>
-                    </ul>
-                    <ul class="nav navbar-nav navbar-right">
-                    <form method="get" class="navbar-form navbar-left form-inline" role="search">
-                        <div class="form-group">
-                            <div class="input-group input-group-sm">
-                                {{ filter_form.search }}
-                                <span class="input-group-btn">
-                                    <button id="searchSubmit" class="btn btn-default " type="submit"><i class="glyphicon glyphicon-search"></i></button>
-                                </span>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <a data-toggle="modal" href="#myModal" class="btn btn-primary btn-sm"><i class="glyphicon glyphicon-filter"></i></a>
-                        </div>
-                        <!-- Modal -->
-                          <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-                            <div class="modal-dialog">
-                              <div class="modal-content">
-                                <div class="modal-header">
-                                  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                                  <h4 class="modal-title">Фільтр</h4>
-                                </div>
-                                <div class="modal-body">
-                                        <div class="btn-toolbar">
-                                          <div class="btn-group">
-                                              <div class="control-group">
-                                                <label class="control-label">Статус</label>
-                                                <div class="controls">
-                                                    {{ filter_form.status }}
-                                                </div>
-                                              </div>
-                                          </div>
-                                          <div class="btn-group">
-                                              <div class="control-group">
-                                                <label class="control-label">Жалобщики</label>
-                                                <div class="controls">
-                                                    {{ filter_form.worker }}
-                                                </div>
-                                              </div>
-                                          </div>
-                                          <div class="btn-group"></div>
-                                        </div>
-
-                                </div>
-                                <div class="modal-footer">
-                                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                                  <button id="searchSubmit" type="submit" class="btn btn-primary">Save changes</button>
-                                </div>
-                              </div><!-- /.modal-content -->
-                            </div><!-- /.modal-dialog -->
-                          </div><!-- /.modal -->
-                    </form>
-                    </ul>
-                  </div><!-- /.navbar-collapse -->
-                </nav>
+    <div id="menu-sprites"></div>
+    <div id="dtabstrip">
+        <ul>
+            <li class="k-state-active">First Tab
+                <input type='button' value='X' onClick='DeleteTabs(this);'>
+            </li>
+            <li class="">Second Tab
+                <input type='button' value='X' onClick='DeleteTabs(this);'>
+            </li>
+        </ul>
+        <div>
+            <div id="grid" style="height: 380px"></div>
+        </div>
+        <div>
+            2222ssadasfas
         </div>
     </div>
-    <div class="row">
-        <div class="col-xs-18 col-md-12">
-            <form method="post">{% csrf_token %}
-                <div class="well well-sm">
-                    <select class="selectpicker">
-                        <option selected>Дії</option>
-                        <option value="1">Виконати</option>
-                        <option value="2">Змінити працівника</option>
-                        <option value="3">Видалити обрані заявки</option>
-                    </select>
-                    <button id="" type="submit" class="btn btn-primary btn-sm">уперед</button>
-                </div>
-                <table class="table table-hover table-striped">
-                    <thead>
-                        <tr>
-                            <td><input id="select_all_checkbox" type="checkbox" class="checkbox" /></td>
-                            {% table_header headers %}
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {% for claim in claims.object_list %}
-                        <tr>
-                            <td><input type="checkbox" class="checkbox" name="claims_checked_list" value="{{ claim.id }}"/></td>
-                            <td class=""><a href="#" rel="{{ claim.id }}">{{ claim.vyl }}</a>
-                                <ul class="dropdown-menu" id="help_text_content_{{ claim.id }}">
-                                  <li class="list-group-item">Дом. тел. - {{ claim.domtel }}</li>
-                                  <li class="list-group-item">Моб. тел. - {{ claim.mobtel }}</li>
-                                  <li class="list-group-item">Група - {{ claim.claims_group }}</li>
-                                  <li class="list-group-item">Коментарії - {{ claim.comments }}</li>
-                                </ul>
-                            </td>
-                            <td class="">{{ claim.kv }}</td>
-                            <td class="">{{ claim.login }}</td>
-                            <td class="">{{ claim.error }}</td>
-                            <td class="">{{ claim.who_give }}</td>
-                            <td class="">{{ claim.pub_date }}</td>
-                            {% if not claim.who_do %}
-                                <td class="">-</td>
-                                <td class="">-</td>
-                            {% else %}
-                                {% if claim.status == False %}
-                                    <td class="">-</td>
-                                {% else %}
-                                    <td class="">{{ claim.datetime }}</td>
-                                {% endif %}
-                                <td class="">{{ claim.date_give }}</td>
-                            {% endif %}
-                            <td class="">
-                                {% if claim.who_do %}
-                                    {{ claim.who_do }} -
-                                    {% if claim.what_do %}
-                                        <a id="{{ claim.id }}" href="#" class="glyphicon glyphicon-info-sign" data-toggle="popover" title="{{ claim.what_do }}" data-content=""></a>
-                                    {% else %}
-                                        <a id="{{ claim.id }}" href="#" class="glyphicon glyphicon-info-sign" data-toggle="popover" title="-" data-content=""></a>
-                                    {% endif %}
-                                {% else %}
-                                    -
-                                {% endif %}
-                            </td>
-                            <td class="">{{ claim.same_claim }}</td>
-                            <td class="">{{ claim.line_type }}</td>
-                            <td class="">
-                                    {% if claim.status == False %}
-                                        <span class="glyphicon glyphicon-remove-circle"></span>
-                                    {% else %}
-                                        <span class="glyphicon glyphicon-ok-circle"></span>
-                                    {% endif %}
-                                    <span><a href="{{ claim.id }}" class="glyphicon glyphicon-edit"></a></span>
-                            </td>
-                        </tr>
-                        <script>
-                            $(function (){
-                                $('#{{ claim.id }}').tooltip('hide');
+    <script>
+        var dtabStrip = $("#dtabstrip").kendoTabStrip({
+            animation: {
+                open: {
+                    effects: "fadeIn"
+                },
+                close: {
+                    duration: 200,
+                    effects: "fadeOut"
+                }
+            }
 
-                                $('[rel={{ claim.id }}]').popover({
-                                    placement: 'bottom',
-                                    html : true,
-                                    content: function() {
-                                      return $('#help_text_content_{{ claim.id }}').html();
-                                    }
-                                });
+        }).data("kendoTabStrip");
 
-                            });
-                        </script>
-                    {% endfor %}
-                    </tbody>
-
-                    <tfoot>
-                        <tr>
-                            <td colspan="2">
-                                <div>
-                                    {% if claims.has_previous %}
-                                    <a href="{% if ot %}?ot={{ ot }}&o={{ o }}&{% else %}?{% endif %}{% if status %}status={{ status }}&{% if worker %}worker={{ worker }}&{% endif %}{% if search %}search={{ search }}&{% endif %}{% endif %}page={{ claims.previous_page_number }}">
-                                        Previous
-                                    </a> |
-                                    {% endif %}
-
-                                    <span>Page {{ claims.number }} of {{ claims.paginator.num_pages }}</span>
-
-                                    {% if claims.has_next %} |
-                                    <a href="{% if ot %}?ot={{ ot }}&o={{ o }}&{% else %}?{% endif %}{% if status %}status={{ status }}&{% if worker %}worker={{ worker }}&{% endif %}{% if search %}search={{ search }}&{% endif %}{% endif %}page={{ claims.next_page_number }}">
-                                        Next
-                                    </a>
-                                    {% endif %}
-                                </div>
-                            </td>
-                            <td colspan="11">
-                                {{ claims_count }}
-                            </td>
-                        </tr>
-                    </tfoot>
-                </table>
-                </form>
+		function DeleteTabs(ImgObj) {
+            var aa = $(ImgObj).closest("li").text() ;
+            dtabStrip.remove($(ImgObj).closest("li").index());
+        }
+    </script>
+    <script type="text/x-kendo-template" id="template">
+        <div class="toolbar">
+            <label class="category-label" for="category">Show products by category:</label>
+            <input type="search" id="category" style="width: 150px"/>
         </div>
-    </div>
+    </script>
+
 {% endblock %}

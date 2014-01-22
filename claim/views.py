@@ -12,6 +12,7 @@ from django.shortcuts import render
 from django.db.models import Q
 from django.db.models import F
 import datetime
+import json
 
 
 @login_required(login_url='/login/')
@@ -108,23 +109,20 @@ def claims_internet(request):
                         'filter_form': filter_form,
                     })
 
-def actions(request, value, id):
-    if request.method == "post":
-        value = request.POST.get('value')
-        claims_id_list = request.POST.getlist('id')
 
-
-#def ajax_claims_search(request):
-#    if request.is_ajax():
-#        search = request.GET.get( 'search' )
-#        print search
-#        if search is not None:
-#            claims = ClaimInternet.objects.filter(
-#                Q( vyl = search ) |
-#                Q( kv = search ) |
-#                Q( login = search ) ).order_by( '-pub_date' )
-#            data = {
-#                'claims': claims,
-#            }
-#            return render_to_response( 'claims-internet/search_results.html', data,
-#                                       context_instance = RequestContext( request ) )
+def claims_list(request):
+    if request.is_ajax():
+        q = request.GET.get('q')
+        if q is not None:
+            claims = ClaimInternet.objects.filter(
+                Q(pk__contains=q) |
+                Q(login__contains=q) |
+                Q(kv__contains=q)).order_by('pk')
+            data = [{
+                        'claim_id': c.pk,
+                        'claim_vyl': c.vyl_id,
+                        'claim_kv': c.kv,
+                        'claim_login': c.login
+                    } for c in claims]
+            print data
+            return HttpResponse(json.dumps(data))
