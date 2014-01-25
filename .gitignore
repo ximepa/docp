@@ -6,7 +6,7 @@
 .project
 .settings
 .settings/*
-settings_local.py
+local_settings.py 
 nbproject
 *.log
 *.pot
