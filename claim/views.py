@@ -112,17 +112,46 @@ def claims_internet(request):
 
 def claims_list(request):
     if request.is_ajax():
-        q = request.GET.get('q')
-        if q is not None:
+        data = None
+        status = request.GET.get('status')
+        print status
+        disclaim = request.GET.get('disclaim')
+        print disclaim
+        search = request.GET.get('search')
+        print search
+        claims = ClaimInternet.objects.all()
+        if status and disclaim and search:
+            print 'status filter'
             claims = ClaimInternet.objects.filter(
-                Q(pk__contains=q) |
-                Q(login__contains=q) |
-                Q(kv__contains=q)).order_by('pk')
-            data = [{
-                        'claim_id': c.pk,
-                        'claim_vyl': c.vyl_id,
-                        'claim_kv': c.kv,
-                        'claim_login': c.login
-                    } for c in claims]
-            print data
-            return HttpResponse(json.dumps(data))
+                Q(status=status, disclaimer=disclaim, login__icontains=search))
+        elif status and disclaim:
+            claims = ClaimInternet.objects.filter(
+                Q(status=status, disclaimer=disclaim,))
+        elif status and search:
+            claims = ClaimInternet.objects.filter(
+                Q(status=status, login__icontains=search,))
+        elif status:
+            claims = ClaimInternet.objects.filter(
+                Q(status=status,))
+        elif disclaim and search:
+            print 'status filter'
+            claims = ClaimInternet.objects.filter(
+                Q(disclaimer=disclaim, login__icontains=search))
+        elif disclaim:
+            print 'status filter'
+            claims = ClaimInternet.objects.filter(
+                Q(disclaimer=disclaim,))
+        elif search:
+            print 'status filter'
+            claims = ClaimInternet.objects.filter(
+                Q(login__icontains=search))
+        data = [{
+                'claim_id': c.pk,
+                'claim_vyl': c.vyl_id,
+                'claim_kv': c.kv,
+                'claim_login': c.login,
+                'claim_status': c.status,
+                'claim_disclaimer': c.disclaimer,
+            } for c in claims]
+        print data
+        return HttpResponse(json.dumps(data))

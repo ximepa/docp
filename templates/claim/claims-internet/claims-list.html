@@ -5,9 +5,6 @@
 <script language="javascript">
 
     $(document).ready(function () {
-
-
-
         $("#menu-sprites").kendoMenu({
             dataSource: [{
                     text: "Brazil", spriteCssClass: "brazilFlag", items: [
@@ -28,18 +25,23 @@
                     ]
                 }]
         });
-
-
+        console.log($('#status').val())
         var dataSource = new kendo.data.DataSource({
             transport: {
                 read: function(options) {
-                    q = null;
+                    status = $('#status').val();
+                    disclaim = $('#disclaim').val();
+                    search = $('#searchbox').val();
                     $.ajax({
                         type: "GET",
-                        url: '{% url 'claim:claims_list' %}?q=' + q,
+                        url: '{% url 'claim:claims_list' %}',
                         contentType: "application/json; charset=utf-8",
                         dataType: 'json',
-                        data: q,
+                        data: {
+                            status: status,
+                            disclaim: disclaim,
+                            search: search
+                        },
                         success: function(data) {
                             options.success(data);
                         }
@@ -49,84 +51,87 @@
             schema: {
                 model: {
                     fields: {
-                        claim_id: { type: "number" },
-                        claim_vyl: { type: "number" },
-                        claim_kv: { type: "number" },
-                        claim_login: { type: "string" }
+                        claim_id: { type: "string" },
+                        claim_vyl: { type: "string" },
+                        claim_kv: { type: "string" },
+                        claim_login: { type: "string" },
+                        claim_status: { type: "boolean" },
+                        claim_disclaimer: { type: "boolean" }
                     }
                 }
             },
-            pageSize: 30,
-            serverPaging: true,
+            pageSize: 25,
+            serverPaging: false,
             serverFiltering: true,
-            serverSorting: true
+            serverSorting: false
         });
 
-
-{#        var dataSource = new kendo.data.DataSource({#}
-{#            transport: {#}
-{#                read: function(options) {#}
-{#                    q = 1#}
-{#                    var url = '{% url 'claim:claims_list' %}?q=' + q;#}
-{#                    $.getJSON(url, function(data) {#}
-{#                        console.log(data);#}
-{#                        $.each(data, function() {#}
-{#                            $('#claim_id').val(this.claim_id);#}
-{#                            $('#claim_vyl').val(this.claim_vyl);#}
-{#                        })#}
-{#                    });#}
-{#                }#}
-{#            },#}
-{#            schema: {#}
-{#                model: {#}
-{#                    fields: {#}
-{#                        claim_id: { type: "number" },#}
-{#                        claim_vyl: { type: "number" },#}
-{#                        claim_kv: { type: "number" },#}
-{#                        claim_login: { type: "string" }#}
-{#                    }#}
-{#                }#}
-{#            },#}
-{#            pageSize: 30,#}
-{#            serverPaging: true,#}
-{#            serverFiltering: true,#}
-{#            serverSorting: true#}
-{#        });#}
-
-
-
-        $("#grid").kendoGrid({
+        var grid = $("#grid").kendoGrid({
             dataSource: dataSource,
             editable: "popup",
-            toolbar: ["create", "save", "cancel"],
-            //toolbar: kendo.template($("#template").html()),
+            toolbar: [
+                "create",
+                "save",
+                "cancel",
+                {
+                    template: $("#template").html()
+                }
+            ],
             height: 540,
             sortable: {
                 mode: "multiple"
             },
-            filterable: true,
+            //filterable: true,
+            reorderable: true,
             columnMenu: true,
-            pageable: true,
+            pageable: {
+                refresh: true,
+                pageSizes: true
+            },
             columns: [ {
                     field: "claim_id",
-                    title: "claim_id",
-                    width: 100
+                    title: "ID",
+                    width: 60
                 }, {
                     field: "claim_vyl",
-                    title: "claim_vyl",
-                    width: 100
+                    title: "Вулиця",
+                    width: 200
                 }, {
                     field: "claim_kv",
-                    title: "claim_kv",
-                    width: 100
+                    title: "Кв.",
+                    width: 40
                 }, {
                     field: "claim_login",
-                    filterable: false
+                    title: "Логін",
+                    width: 100
+                }, {
+                    field: "claim_status",
+                    title: "Статус",
+                    width: 70
+                }, {
+                    field: "claim_disclaimer",
+                    title: "Відмова",
+                    width: 70
                 }, { command: [{ name: "edit" }] }
             ]
         });
+        //change event
+        var search_ac = grid.find("#searchbox").kendoAutoComplete({})
+        var grid_data = $("#grid").data("kendoGrid")
+        search_ac.keyup(function () {
+            var val = $('#searchbox').val();
+            grid_data.dataSource.filter({});
+        });
+        var dropDown_status = grid.find("#status").kendoDropDownList({});
+        var dropDown_disclaim = grid.find("#disclaim").kendoDropDownList({});
+        $(document).change(function(){
+            var status_val = dropDown_status.val();
+            var disclaim_val = dropDown_disclaim.val();
+            grid_data.dataSource.filter({});
+        });
     });
 </script>
+
 {% endblock %}
 {% block content %}
     <div id="menu-sprites"></div>
@@ -167,8 +172,46 @@
     </script>
     <script type="text/x-kendo-template" id="template">
         <div class="toolbar">
-            <label class="category-label" for="category">Show products by category:</label>
-            <input type="search" id="category" style="width: 150px"/>
+            <label>Статус</label>
+            <select id="status">
+                <option value="">Всі</option>
+                <option value="1">Виконані</option>
+                <option value="0" selected>Не виконані</option>
+            </select>
+            <label>Відмова</label>
+            <select id="disclaim">
+                <option value="">Всі</option>
+                <option value="1">Відмова</option>
+                <option value="0" selected>Не відмова</option>
+            </select>
+            <input id="searchbox" placeholder="Вводьте для пошуку" />
+            <ul id="menu">
+                <li><span>HerĹa 1</span></li>
+                <li><span>HerĹa 2</span></li>
+                <li><span>HerĹa 3</span>
+                    <ul>
+                        <li><span>Level 2-A-1</span>
+                            <ul>
+                                <li><span>Level 3-A-1</span>
+                                    <ul>
+                                        <li><span>Level 4-A-1</span>
+                                            <ul>
+                                                <li><span>Level 5-A-1</span></li>
+                                            </ul>
+                                        </li>
+                                        <li><span>Level 4-A-2</span></li>
+                                    </ul>
+                                </li>
+                                <li><span>Level 3-A-2</span></li>
+                                <li><span>Level 3-A-3</span></li>
+                            </ul>
+                        </li>
+                        <li><span>Level 2-A-2</span></li>
+                        <li><span>Level 2-A-3</span></li>
+                        <li><span>Level 2-A-4</span></li>
+                    </ul>
+                </li>
+            </ul>
         </div>
     </script>
 
