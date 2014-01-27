@@ -25,7 +25,6 @@
                     ]
                 }]
         });
-        console.log($('#status').val())
         var dataSource = new kendo.data.DataSource({
             transport: {
                 read: function(options) {
@@ -46,25 +45,115 @@
                             options.success(data);
                         }
                     });
+                },
+                update: function(claim) {
+                    $.ajax({
+                        type: "POST",
+                        url: "/claims_update/" + claim.id ,
+                        dataType: "json",
+                        data: {
+                            name: "Jane Doe",
+                            age: 30
+                          },
+                        success: function(result) {
+                            claim.success(result);
+                        },
+                        error: function(result) {
+                            claim.error(result);
+                        }
+                    });
+                },
+                create: function(claim) {
+                    //console.log(claim.data)
+                    //var csrftoken = getCookie('csrftoken');
+                    $.ajax({
+                        type: "POST",
+                        url: "{% url 'claim:claims_add' %}",
+                        dataType: "json",
+                        data: {
+                            claim_vyl: "123",
+                            claim_kv: "123",
+                            claim_login: "login",
+                            claim_status: 0,
+                            claim_disclaimer: 0,
+                            claim_error: "1"
+                          },
+                        success: function(result) {
+                            claim.success(result);
+                        },
+                        error: function(result) {
+                            claim.error(result);
+                        }
+                    });
                 }
             },
+            batch: true,
             schema: {
                 model: {
+                    id: "id",
                     fields: {
-                        claim_id: { type: "string" },
-                        claim_vyl: { type: "string" },
-                        claim_kv: { type: "string" },
-                        claim_login: { type: "string" },
+                        claim_id: {
+                            editable: false,
+                            nullable: true
+                        },
+                        claim_vyl: {
+                            editable: true,
+                            nullable: false,
+                            validation: {
+                                required: {
+                                    message: "Оберіть вулицю"
+                                }
+                            }
+                        },
+                        claim_kv: {
+                            editable: true,
+                            nullable: false
+                        },
+                        claim_login: {
+                            editable: true,
+                            nullable: false,
+                            validation: {
+                                required: {
+                                    message: "Введіть логін"
+                                }
+                            }
+                        },
                         claim_status: { type: "boolean" },
-                        claim_disclaimer: { type: "boolean" }
+                        claim_disclaimer: { type: "boolean" },
+                        claim_error: {
+                            editable: true,
+                            nullable: false
+                        },
+                        claim_importance: {
+                            editable: true,
+                            nullable: false
+                        },
+                        claim_claim_type: {
+                            editable: true,
+                            nullable: false
+                        },
+                        claim_line_type: {
+                            editable: true,
+                            nullable: false
+                        },
+                        claim_who_give: {
+                            editable: true,
+                            nullable: false
+                        },
+                        claim_pub_date: {
+                            editable: true,
+                            nullable: false
+                        }
                     }
                 }
             },
-            pageSize: 25,
+            pageSize: 50,
             serverPaging: false,
             serverFiltering: true,
             serverSorting: false
         });
+        //dataSource.add( { claim_vyl: "2" });
+        //dataSource.sync();
 
         var grid = $("#grid").kendoGrid({
             dataSource: dataSource,
@@ -77,21 +166,22 @@
                     template: $("#template").html()
                 }
             ],
-            height: 540,
+            height: 640,
             sortable: {
                 mode: "multiple"
             },
             //filterable: true,
             reorderable: true,
             columnMenu: true,
+            groupable: true,
             pageable: {
                 refresh: true,
-                pageSizes: true
+                pageSizes: [10, 25, 50, 100]
             },
-            columns: [ {
+            columns: [{
                     field: "claim_id",
-                    title: "ID",
-                    width: 60
+                    title: "id",
+                    width: 50
                 }, {
                     field: "claim_vyl",
                     title: "Вулиця",
@@ -105,12 +195,33 @@
                     title: "Логін",
                     width: 100
                 }, {
+                    field: "claim_error",
+                    title: "claim_error",
+                    width: 320
+                }, {
+                    field: "claim_who_give",
+                    title: "claim_who_give",
+                    width: 130
+                }, {
+                    field: "claim_pub_date",
+                    title: "claim_pub_date",
+                    format: "{0: yyyy-MM-dd HH:mm:ss}",
+                    width: 130
+                }, {
                     field: "claim_status",
                     title: "Статус",
                     width: 70
                 }, {
                     field: "claim_disclaimer",
                     title: "Відмова",
+                    width: 70
+                }, {
+                    field: "claim_claim_type",
+                    title: "claim_claim_type",
+                    width: 70
+                }, {
+                    field: "claim_line_type",
+                    title: "claim_line_type",
                     width: 70
                 }, { command: [{ name: "edit" }] }
             ]
@@ -119,16 +230,17 @@
         var search_ac = grid.find("#searchbox").kendoAutoComplete({})
         var grid_data = $("#grid").data("kendoGrid")
         search_ac.keyup(function () {
-            var val = $('#searchbox').val();
             grid_data.dataSource.filter({});
         });
         var dropDown_status = grid.find("#status").kendoDropDownList({});
         var dropDown_disclaim = grid.find("#disclaim").kendoDropDownList({});
-        $(document).change(function(){
-            var status_val = dropDown_status.val();
-            var disclaim_val = dropDown_disclaim.val();
+        $('#status').change(function(){
             grid_data.dataSource.filter({});
         });
+        $('#disclaim').change(function(){
+            grid_data.dataSource.filter({});
+        });
+        $('#menu').kendoMenu({})
     });
 </script>
 
@@ -170,48 +282,52 @@
             dtabStrip.remove($(ImgObj).closest("li").index());
         }
     </script>
+    <ul>
+        <li value="">
+
+        </li>
+    </ul>
     <script type="text/x-kendo-template" id="template">
         <div class="toolbar">
-            <label>Статус</label>
-            <select id="status">
-                <option value="">Всі</option>
-                <option value="1">Виконані</option>
-                <option value="0" selected>Не виконані</option>
-            </select>
-            <label>Відмова</label>
-            <select id="disclaim">
-                <option value="">Всі</option>
-                <option value="1">Відмова</option>
-                <option value="0" selected>Не відмова</option>
-            </select>
-            <input id="searchbox" placeholder="Вводьте для пошуку" />
-            <ul id="menu">
-                <li><span>HerĹa 1</span></li>
-                <li><span>HerĹa 2</span></li>
-                <li><span>HerĹa 3</span>
-                    <ul>
-                        <li><span>Level 2-A-1</span>
-                            <ul>
-                                <li><span>Level 3-A-1</span>
-                                    <ul>
-                                        <li><span>Level 4-A-1</span>
-                                            <ul>
-                                                <li><span>Level 5-A-1</span></li>
-                                            </ul>
-                                        </li>
-                                        <li><span>Level 4-A-2</span></li>
-                                    </ul>
-                                </li>
-                                <li><span>Level 3-A-2</span></li>
-                                <li><span>Level 3-A-3</span></li>
-                            </ul>
-                        </li>
-                        <li><span>Level 2-A-2</span></li>
-                        <li><span>Level 2-A-3</span></li>
-                        <li><span>Level 2-A-4</span></li>
-                    </ul>
-                </li>
-            </ul>
+            <div id="sec1">
+                <ul id="menu">
+                    <li>
+                        Фільтр
+                        <ul>
+                            <li>Статус
+                                <ul>
+                                    <li>
+                                        <div id="template" style="padding: 10px;">
+                                            <select id="status">
+                                                <option value="">Всі</option>
+                                                <option value="1">Виконані</option>
+                                                <option value="0" selected>Не виконані</option>
+                                            </select>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li>Відмова
+                                <ul>
+                                    <li>
+                                        <div id="template" style="padding: 10px;">
+                                            <select id="disclaim">
+                                                <option value="">Всі</option>
+                                                <option value="1">Відмова</option>
+                                                <option value="0" selected>Не відмова</option>
+                                            </select>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            <div id="sec2">
+                <input id="searchbox" placeholder="Вводьте для пошуку" />
+            </div>
+
         </div>
     </script>
 

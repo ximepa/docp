@@ -109,6 +109,18 @@ def claims_internet(request):
                         'filter_form': filter_form,
                     })
 
+def default(obj):
+    """Default JSON serializer."""
+    import calendar, datetime
+
+    if isinstance(obj, datetime.datetime):
+        if obj.utcoffset() is not None:
+            obj = obj - obj.utcoffset()
+    millis = int(
+        calendar.timegm(obj.timetuple()) * 1000 +
+        obj.microsecond / 1000
+    )
+    return millis
 
 def claims_list(request):
     if request.is_ajax():
@@ -145,13 +157,67 @@ def claims_list(request):
             print 'status filter'
             claims = ClaimInternet.objects.filter(
                 Q(login__icontains=search))
+        print json.dumps(datetime.datetime.now(), default=default)
         data = [{
-                'claim_id': c.pk,
+                'claim_id': c.id,
+                'claim_vyl': c.vyl.sorting,
+                'claim_kv': c.kv,
+                'claim_login': c.login,
+                'claim_status': c.status,
+                'claim_disclaimer': c.disclaimer,
+                'claim_error': c.error.name,
+                'claim_who_give': c.who_give,
+                'claim_pub_date': json.dumps(c.pub_date, default=default),
+                'claim_importance': c.importance.status_importance,
+                'claim_claim_type': c.claim_type_id,
+                'claim_line_type': c.line_type_id
+            } for c in claims]
+        print data
+        return HttpResponse(json.dumps(data))
+
+def claims_add(request):
+    if request.is_ajax():
+        if request.method == 'POST':
+            claims = ClaimInternet.objects.all()
+            print request.POST.get('claim_error')
+            cm= ClaimInternet(
+                vyl_id = request.POST.get('claim_vyl'),
+                kv = request.POST.get('claim_kv'),
+                login = request.POST.get('claim_login'),
+                status = request.POST.get('claim_status'),
+                disclaimer = request.POST.get('claim_disclaimer'),
+                error_id = request.POST.get('claim_error'),
+                datetime = datetime.datetime.now(),
+                date_change = None,
+                date_give = datetime.datetime.now(),
+            )
+            cm.save()
+            print cm.id
+            data = [{
+                'claim_id': c.id,
                 'claim_vyl': c.vyl_id,
                 'claim_kv': c.kv,
                 'claim_login': c.login,
                 'claim_status': c.status,
                 'claim_disclaimer': c.disclaimer,
             } for c in claims]
-        print data
-        return HttpResponse(json.dumps(data))
+    return HttpResponse(json.dumps(data))
+
+def claims_update(request, id):
+    if request.is_ajax():
+        if request.method == 'POST':
+            claim = ClaimInternet.objects.get(id=id)
+            data = [{
+                'claim_vyl': claim.vyl_id,
+                'claim_kv': claim.kv,
+                'claim_login': claim.login,
+                'claim_status': claim.status,
+                'claim_disclaimer': claim.disclaimer,
+            }]
+    return HttpResponse(json.dumps(data))
+            # data = None
+            # vyl = request.POST['claim_vyl']
+            # kv = request.POST['claim_kv']
+            # login = request.POST['claim_login']
+            # status = request.POST['claim_status']
+            # disclaimer = request.POST['claim_disclaimer']

@@ -33,6 +33,13 @@ class ClaimInternet(models.Model):
     def __unicode__(self):
         return self.vyl.sorting
 
+    def get_json(self):
+        return {
+            'id': self.pk,
+            'vyl': self.vyl,
+            'error': self.error
+        }
+
     def claim_internet_count(self):
         claim_inet_count = ClaimInternet.objects.all().count()
         return claim_inet_count

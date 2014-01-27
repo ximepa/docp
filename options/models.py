@@ -39,6 +39,12 @@ class Vyl(models.Model):
         verbose_name = u'Вулиця'
         verbose_name_plural = u'Вулиці'
 
+    def get_json(self):
+        return {
+            'id': self.pk,
+            'name': self.name,
+        }
+
 
 class House(models.Model):
     num = models.CharField(max_length=200, unique=True, verbose_name='№ будинку', )
@@ -102,6 +108,12 @@ class Error(models.Model):
         ordering = ('name',)
         verbose_name = u'Помилка'
         verbose_name_plural = u'Помилки'
+
+    def get_json(self):
+        return {
+            'id': self.pk,
+            'name': self.name,
+        }
 
 
 class Error_type(models.Model):
