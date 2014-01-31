@@ -49,11 +49,31 @@
                 update: function(claim) {
                     $.ajax({
                         type: "POST",
-                        url: "/claims_update/" + claim.id ,
+                        url: "/claims_update/" + claim.data.models[0].claim_id + '/' ,
+                        dataType: "json",
+                        success: function(result) {
+                            console.log(result)
+                            claim.success(result);
+                        },
+                        error: function(result) {
+                            claim.error(result);
+                        }
+                    });
+                },
+                create: function(claim) {
+                    console.log(claim.data.models[0])
+                    //var csrftoken = getCookie('csrftoken');
+                    $.ajax({
+                        type: "POST",
+                        url: "{% url 'claim:claims_add' %}",
                         dataType: "json",
                         data: {
-                            name: "Jane Doe",
-                            age: 30
+                            claim_vyl: claim.data.models[0].claim_vyl,
+                            claim_kv: claim.data.models[0].claim_kv,
+                            claim_login: claim.data.models[0].claim_login,
+                            claim_error: claim.data.models[0].claim_error,
+                            claim_status: claim.data.models[0].claim_status,
+                            claim_disclaimer: claim.data.models[0].claim_disclaimer
                           },
                         success: function(result) {
                             claim.success(result);
@@ -63,26 +83,16 @@
                         }
                     });
                 },
-                create: function(claim) {
-                    //console.log(claim.data)
-                    //var csrftoken = getCookie('csrftoken');
+                destroy: function (options) {
                     $.ajax({
                         type: "POST",
-                        url: "{% url 'claim:claims_add' %}",
+                        url: "/claim_delete/" + options.data.models[0].claim_id + '/' ,
                         dataType: "json",
-                        data: {
-                            claim_vyl: "123",
-                            claim_kv: "123",
-                            claim_login: "login",
-                            claim_status: 0,
-                            claim_disclaimer: 0,
-                            claim_error: "1"
-                          },
                         success: function(result) {
-                            claim.success(result);
+                          options.success(result);
                         },
                         error: function(result) {
-                            claim.error(result);
+                          options.error(result);
                         }
                     });
                 }
@@ -90,7 +100,7 @@
             batch: true,
             schema: {
                 model: {
-                    id: "id",
+                    id: "claim_id",
                     fields: {
                         claim_id: {
                             editable: false,
@@ -137,12 +147,17 @@
                             nullable: false
                         },
                         claim_who_give: {
-                            editable: true,
+                            editable: false,
                             nullable: false
                         },
                         claim_pub_date: {
+                            type: "date",
+                            parse: function(value) {
+                                return new Date(value * 1000);
+                            },
                             editable: true,
                             nullable: false
+
                         }
                     }
                 }
@@ -153,7 +168,13 @@
             serverSorting: false
         });
         //dataSource.add( { claim_vyl: "2" });
-        //dataSource.sync();
+        dataSource.sync();
+
+        function toDate(value) {
+            var dateRegExp = /^\/Date\((.*?)\)\/$/;
+            var date = dateRegExp .exec(value);
+            return new Date(parseInt(date[1]));
+        }
 
         var grid = $("#grid").kendoGrid({
             dataSource: dataSource,
@@ -179,53 +200,121 @@
                 pageSizes: [10, 25, 50, 100]
             },
             columns: [{
-                    field: "claim_id",
-                    title: "id",
-                    width: 50
-                }, {
-                    field: "claim_vyl",
-                    title: "Вулиця",
-                    width: 200
-                }, {
-                    field: "claim_kv",
-                    title: "Кв.",
-                    width: 40
-                }, {
-                    field: "claim_login",
-                    title: "Логін",
-                    width: 100
-                }, {
-                    field: "claim_error",
-                    title: "claim_error",
-                    width: 320
-                }, {
-                    field: "claim_who_give",
-                    title: "claim_who_give",
-                    width: 130
-                }, {
-                    field: "claim_pub_date",
-                    title: "claim_pub_date",
-                    format: "{0: yyyy-MM-dd HH:mm:ss}",
-                    width: 130
-                }, {
-                    field: "claim_status",
-                    title: "Статус",
-                    width: 70
-                }, {
-                    field: "claim_disclaimer",
-                    title: "Відмова",
-                    width: 70
-                }, {
-                    field: "claim_claim_type",
-                    title: "claim_claim_type",
-                    width: 70
-                }, {
-                    field: "claim_line_type",
-                    title: "claim_line_type",
-                    width: 70
-                }, { command: [{ name: "edit" }] }
+                        field: "claim_id",
+                        title: "id",
+                        width: 50
+                    }, {
+                        field: "claim_vyl",
+                        title: "Вулиця",
+                        width: 200,
+                        editor: dom_listDropDownEditor
+                    }, {
+                        field: "claim_kv",
+                        title: "Кв.",
+                        width: 40
+                    }, {
+                        field: "claim_login",
+                        title: "Логін",
+                        width: 100
+                    }, {
+                        field: "claim_error",
+                        title: "Помилка",
+                        width: 320,
+                        editor: error_listDropDownEditor
+                        //template: "#=claim_error#"
+                    }, {
+                        field: "claim_who_give",
+                        title: "claim_who_give",
+                        width: 130
+                    }, {
+                        field: "claim_pub_date",
+                        title: "claim_pub_date",
+                        width: 130,
+                        format: "{0:yyyy-MM-dd hh:mm:ss}",
+                        editor: dateTimeEditor
+                    }, {
+                        field: "claim_status",
+                        title: "Статус",
+                        width: 70
+                    }, {
+                        field: "claim_disclaimer",
+                        title: "Відмова",
+                        width: 70
+                    }, {
+                        field: "claim_claim_type",
+                        title: "Тип",
+                        width: 75
+                    }, {
+                        field: "claim_line_type",
+                        title: "Лінія",
+                        width: 70
+                    }, { command: [
+                        {
+                            name: "edit"
+                        }
+                    {% if request.user.is_superuser %}
+                        ,{
+                            name: "destroy"
+                        }
+                    {% endif %}
+                ] }
             ]
         });
+        var ds_claim_error = new kendo.data.DataSource({
+            transport: {
+                read: function(options) {
+                    $.ajax({
+                        type: "GET",
+                        url: '{% url 'claim:internet_error_list' %}',
+                        contentType: "application/json; charset=utf-8",
+                        dataType: 'json',
+                        success: function(error_data) {
+                            options.success(error_data);
+                        }
+                    });
+                }
+            }
+        });
+        var ds_claim_dom = new kendo.data.DataSource({
+            transport: {
+                read: function(options) {
+                    $.ajax({
+                        type: "GET",
+                        url: '{% url 'claim:dom_list' %}',
+                        contentType: "application/json; charset=utf-8",
+                        dataType: 'json',
+                        success: function(dom_data) {
+                            options.success(dom_data);
+                        }
+                    });
+                }
+            }
+        });
+
+        function dateTimeEditor(container, options) {
+            $('<input data-text-field="' + options.field + '" data-value-field="' + options.field + '" data-bind="value:' + options.field + '" data-format="' + options.format + '"/>')
+                    .appendTo(container)
+                    .kendoDateTimePicker({});
+        }
+
+        function dom_listDropDownEditor(container, options) {
+            $('<input style="width:200px" required data-text-field="dom_sorting" data-value-field="dom_sorting" data-bind="value:' + options.field + '"/>')
+                .appendTo(container)
+                .kendoDropDownList({
+                    autoBind: false,
+                    dataSource: ds_claim_dom,
+                    height: 300
+                });
+        }
+        function error_listDropDownEditor(container, options) {
+            $('<input style="width:200px" required data-text-field="error_name" data-value-field="error_name" data-bind="value:' + options.field + '"/>')
+                .appendTo(container)
+                .kendoDropDownList({
+                    autoBind: false,
+                    dataSource: ds_claim_error,
+                    height: 300
+                });
+        }
         //change event
         var search_ac = grid.find("#searchbox").kendoAutoComplete({})
         var grid_data = $("#grid").data("kendoGrid")

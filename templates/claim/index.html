@@ -5,7 +5,7 @@
             <h1>Виберіть пунк для перегляду</h1>
             <div class="list-group">
                 <a href="{% url 'claim:claims_internet' %}" class="list-group-item">
-                    Заявки Інтернет
+                    Заявки Інтернет {{ main }}
                     <span class="glyphicon glyphicon-chevron-right"></span>
                     <span class="badge">Невиконані - {{ claim_internet_count_sf }}</span>
                     <span class="badge">Виконані - {{ claim_internet_count_st }}</span>

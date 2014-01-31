@@ -6,6 +6,7 @@ from django.template import RequestContext
 from django.contrib.auth import logout
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger, InvalidPage
 from claim.models import ClaimInternet
+from options.models import Error, Dom
 from claim.lib import SortHeaders
 from claim.form import InternetFilterForm
 from django.shortcuts import render
@@ -21,7 +22,7 @@ def index(request):
     claim_internet_count_st = ClaimInternet.objects.all().filter(status=True).count()
     claim_internet_count_all = ClaimInternet.objects.all().count()
     if request.user.is_authenticated():
-        main_page = 'Hello'
+        main_page = 'Hello world'
         return render_to_response('index.html', {
                         'main': main_page,
                         'user': request.user,
@@ -122,18 +123,15 @@ def default(obj):
     )
     return millis
 
+
 def claims_list(request):
     if request.is_ajax():
         data = None
         status = request.GET.get('status')
-        print status
         disclaim = request.GET.get('disclaim')
-        print disclaim
         search = request.GET.get('search')
-        print search
         claims = ClaimInternet.objects.all()
         if status and disclaim and search:
-            print 'status filter'
             claims = ClaimInternet.objects.filter(
                 Q(status=status, disclaimer=disclaim, login__icontains=search))
         elif status and disclaim:
@@ -146,15 +144,12 @@ def claims_list(request):
             claims = ClaimInternet.objects.filter(
                 Q(status=status,))
         elif disclaim and search:
-            print 'status filter'
             claims = ClaimInternet.objects.filter(
                 Q(disclaimer=disclaim, login__icontains=search))
         elif disclaim:
-            print 'status filter'
             claims = ClaimInternet.objects.filter(
                 Q(disclaimer=disclaim,))
         elif search:
-            print 'status filter'
             claims = ClaimInternet.objects.filter(
                 Q(login__icontains=search))
         print json.dumps(datetime.datetime.now(), default=default)
@@ -169,39 +164,55 @@ def claims_list(request):
                 'claim_who_give': c.who_give,
                 'claim_pub_date': json.dumps(c.pub_date, default=default),
                 'claim_importance': c.importance.status_importance,
-                'claim_claim_type': c.claim_type_id,
-                'claim_line_type': c.line_type_id
+                'claim_claim_type': c.claim_type.name,
+                'claim_line_type': c.line_type.name
             } for c in claims]
-        print data
         return HttpResponse(json.dumps(data))
+
+def parseBoolString(theString):
+    return theString[0].upper() == 'T'
 
 def claims_add(request):
     if request.is_ajax():
         if request.method == 'POST':
-            claims = ClaimInternet.objects.all()
-            print request.POST.get('claim_error')
-            cm= ClaimInternet(
-                vyl_id = request.POST.get('claim_vyl'),
-                kv = request.POST.get('claim_kv'),
-                login = request.POST.get('claim_login'),
-                status = request.POST.get('claim_status'),
-                disclaimer = request.POST.get('claim_disclaimer'),
-                error_id = request.POST.get('claim_error'),
-                datetime = datetime.datetime.now(),
-                date_change = None,
-                date_give = datetime.datetime.now(),
+            claims = ClaimInternet.objects.all().order_by('-pub_date')
+            print request.POST.get('claim_vyl'),
+            print request.POST.get('claim_kv'),
+            print request.POST.get('claim_login'),
+            print parseBoolString(request.POST.get('claim_status')),
+            print parseBoolString(request.POST.get('claim_disclaimer')),
+            print request.POST.get('claim_error'),
+            cm = ClaimInternet(
+                vyl_id=request.POST.get('claim_vyl'),
+                kv=request.POST.get('claim_kv'),
+                login=request.POST.get('claim_login'),
+                who_give=request.user.last_name + ' ' + request.user.first_name,
+                status=parseBoolString(request.POST.get('claim_status')),
+                disclaimer=parseBoolString(request.POST.get('claim_disclaimer')),
+                error_id=request.POST.get('claim_error'),
+                pub_date = datetime.datetime.now(),
+                datetime=datetime.datetime.now(),
+                date_change=None,
+                date_give=datetime.datetime.now(),
             )
             cm.save()
             print cm.id
             data = [{
                 'claim_id': c.id,
-                'claim_vyl': c.vyl_id,
+                'claim_vyl': c.vyl.sorting,
                 'claim_kv': c.kv,
                 'claim_login': c.login,
                 'claim_status': c.status,
                 'claim_disclaimer': c.disclaimer,
+                'claim_error': c.error.name,
+                'claim_who_give': c.who_give,
+                'claim_pub_date': json.dumps(c.pub_date, default=default),
+                'claim_importance': c.importance.status_importance,
+                'claim_claim_type': c.claim_type.name,
+                'claim_line_type': c.line_type.name
             } for c in claims]
     return HttpResponse(json.dumps(data))
+
 
 def claims_update(request, id):
     if request.is_ajax():
@@ -214,10 +225,33 @@ def claims_update(request, id):
                 'claim_status': claim.status,
                 'claim_disclaimer': claim.disclaimer,
             }]
-    return HttpResponse(json.dumps(data))
-            # data = None
-            # vyl = request.POST['claim_vyl']
-            # kv = request.POST['claim_kv']
-            # login = request.POST['claim_login']
-            # status = request.POST['claim_status']
-            # disclaimer = request.POST['claim_disclaimer']
+            return HttpResponse(json.dumps(data))
+
+
+def claim_delete(request, id):
+    if request.is_ajax():
+        if request.method == 'POST':
+            claim = ClaimInternet.objects.get(id=id)
+            claim.delete()
+            return HttpResponse("OK")
+
+
+
+def internet_error_list(request):
+    if request.is_ajax():
+        errors = Error.objects.all().order_by('name').filter(type=1)
+        error_data = [{
+            'error_id': e.id,
+            'error_name': e.name,
+         } for e in errors]
+        return HttpResponse(json.dumps(error_data))
+
+
+def dom_list(request):
+    if request.is_ajax():
+        dom = Dom.objects.all()
+        dom_data = [{
+            'dom_id': d.id,
+            'dom_sorting': d.sorting,
+         } for d in dom]
+        return HttpResponse(json.dumps(dom_data))
