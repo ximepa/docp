@@ -10,7 +10,7 @@
     width: 100%;
 }
 body {
-    background: url("/static/claim/img/bg.png") repeat scroll 0% 0% transparent;
+    /*background: url("/static/claim/img/bg.png") repeat scroll 0% 0% transparent;*/
     font: 75% 'Lucida Sans Unicode','Lucida Grande',arial,helvetica,sans-serif;
 }
 .navbar {

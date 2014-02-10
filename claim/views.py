@@ -22,9 +22,7 @@ def index(request):
     claim_internet_count_st = ClaimInternet.objects.all().filter(status=True).count()
     claim_internet_count_all = ClaimInternet.objects.all().count()
     if request.user.is_authenticated():
-        main_page = 'Hello world'
         return render_to_response('index.html', {
-                        'main': main_page,
                         'user': request.user,
                         'claim_internet_count_sf': claim_internet_count_sf,
                         'claim_internet_count_st': claim_internet_count_st,
@@ -247,11 +245,59 @@ def internet_error_list(request):
         return HttpResponse(json.dumps(error_data))
 
 
-def dom_list(request):
+def claims_statistic_year(request):
     if request.is_ajax():
-        dom = Dom.objects.all()
-        dom_data = [{
-            'dom_id': d.id,
-            'dom_sorting': d.sorting,
-         } for d in dom]
-        return HttpResponse(json.dumps(dom_data))
+        year_list = ClaimInternet.objects.dates('pub_date', 'year')
+        data = [{
+            'year': str(years.year),
+            'claims_all_count': ClaimInternet.objects.filter(pub_date__year=years.year).count(),
+            'claims_completed_count': ClaimInternet.objects.filter(pub_date__year=years.year, status=True,).count(),
+            'claims_disclaim_count': ClaimInternet.objects.filter(pub_date__year=years.year, disclaimer=True,).count(),
+            'claims_uncompleted_count': ClaimInternet.objects.filter(pub_date__year=years.year, disclaimer=False, status=False, claims_group=1).count(),
+            'claims_given_to_plumber_count': ClaimInternet.objects.filter(pub_date__year=years.year, disclaimer=False, status=False, claims_group=2).count(),
+         } for years in year_list]
+        return HttpResponse(json.dumps(data))
+
+
+def claims_statistic_month(request):
+    if request.is_ajax():
+        month_list = ClaimInternet.objects.dates('pub_date', 'month')
+        for years in month_list:
+            print years.year
+            print years.month
+            print ClaimInternet.objects.filter(pub_date__year=years.year, pub_date__month=years.month).count()
+
+        print month_list
+        data = [{
+            'month': str(years.year) + '-' + str(years.month),
+            'claims_all_count': ClaimInternet.objects.filter(pub_date__year=years.year, pub_date__month=years.month).count(),
+            'claims_completed_count': ClaimInternet.objects.filter(pub_date__year=years.year, pub_date__month=years.month, status=True,).count(),
+            'claims_disclaim_count': ClaimInternet.objects.filter(pub_date__year=years.year, pub_date__month=years.month, disclaimer=True,).count(),
+            'claims_uncompleted_count': ClaimInternet.objects.filter(pub_date__year=years.year, pub_date__month=years.month, disclaimer=False, status=False, claims_group=1).count(),
+            'claims_given_to_plumber_count': ClaimInternet.objects.filter(pub_date__year=years.year, pub_date__month=years.month, disclaimer=False, status=False, claims_group=2).count(),
+         } for years in month_list]
+        #print data
+        #print json.dumps(data)
+        return HttpResponse(json.dumps(data))
+
+
+def claims_statistic_day(request):
+    if request.is_ajax():
+        month_list = ClaimInternet.objects.dates('pub_date', 'day')
+        for years in month_list:
+            print years.year
+            print years.month
+            print ClaimInternet.objects.filter(pub_date__year=years.year, pub_date__month=years.day).count()
+
+        print month_list
+        data = [{
+            'day': str(years.year) + '-' + str(years.month) + '-' + str(years.day),
+            'claims_all_count': ClaimInternet.objects.filter(pub_date__year=years.year, pub_date__month=years.month, pub_date__day=years.day).count(),
+            'claims_completed_count': ClaimInternet.objects.filter(pub_date__year=years.year, pub_date__month=years.month, pub_date__day=years.day, status=True,).count(),
+            'claims_disclaim_count': ClaimInternet.objects.filter(pub_date__year=years.year, pub_date__month=years.month, pub_date__day=years.day, disclaimer=True,).count(),
+            'claims_uncompleted_count': ClaimInternet.objects.filter(pub_date__year=years.year, pub_date__month=years.month, pub_date__day=years.day, disclaimer=False, status=False, claims_group=1).count(),
+            'claims_given_to_plumber_count': ClaimInternet.objects.filter(pub_date__year=years.year, pub_date__month=years.month, pub_date__day=years.day, disclaimer=False, status=False, claims_group=2).count(),
+         } for years in month_list]
+        #print data
+        #print json.dumps(data)
+        return HttpResponse(json.dumps(data))

@@ -40,9 +40,13 @@ class ClaimInternet(models.Model):
             'error': self.error
         }
 
-    def claim_internet_count(self):
-        claim_inet_count = ClaimInternet.objects.all().count()
-        return claim_inet_count
+    @classmethod
+    def claims_year_list(cls):
+        return cls.objects.dates('pub_date', 'year')
+
+    @classmethod
+    def claim_internet_count(cls):
+        return ClaimInternet.objects.count()
 
     class Meta:
         ordering = ('-pub_date',)
