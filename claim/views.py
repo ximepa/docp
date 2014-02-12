@@ -12,6 +12,8 @@ from claim.form import InternetFilterForm
 from django.shortcuts import render
 from django.db.models import Q
 from django.db.models import F
+from datetime import timedelta
+from django.utils import timezone
 import datetime
 import json
 
@@ -27,6 +29,23 @@ def index(request):
                         'claim_internet_count_sf': claim_internet_count_sf,
                         'claim_internet_count_st': claim_internet_count_st,
                         'claim_internet_count_all': claim_internet_count_all,
+                    }, context_instance=RequestContext(request))
+    else:
+        return HttpResponseRedirect('/login/')
+
+def internet_claims_statistic(request):
+    if request.user.is_authenticated():
+        return render_to_response('internet_claims_statistic.html', {
+                        'user': request.user,
+                    }, context_instance=RequestContext(request))
+    else:
+        return HttpResponseRedirect('/login/')
+
+
+def current_internet_claims_statistic_view(request):
+    if request.user.is_authenticated():
+        return render_to_response('current_internet_claims_statistic.html', {
+                        'user': request.user,
                     }, context_instance=RequestContext(request))
     else:
         return HttpResponseRedirect('/login/')
@@ -245,55 +264,42 @@ def internet_error_list(request):
 
 def claims_statistic_year(request):
     today_year = datetime.date.today().year
-    print today_year
-
     if request.is_ajax():
-        year_list = ClaimInternet.objects.filter(pub_date__year = today_year).dates('pub_date', 'month')
-        for years in year_list:
-            print years.year
+        year_list = ClaimInternet.objects.filter(pub_date__year=today_year).dates('pub_date', 'day')
         data = [{
-            'year': str(years.year) + '-' + str(years.month),
-            'claims_all_count': ClaimInternet.objects.filter(pub_date__year=years.year, pub_date__month=years.month).count(),
-            'claims_completed_count': ClaimInternet.objects.filter(pub_date__year=years.year, pub_date__month=years.month, status=True,).count(),
-            'claims_disclaim_count': ClaimInternet.objects.filter(pub_date__year=years.year, pub_date__month=years.month, disclaimer=True,).count(),
-            'claims_uncompleted_count': ClaimInternet.objects.filter(pub_date__year=years.year, pub_date__month=years.month, disclaimer=False, status=False, claims_group=1).count(),
-            'claims_given_to_plumber_count': ClaimInternet.objects.filter(pub_date__year=years.year, pub_date__month=years.month, disclaimer=False, status=False, claims_group=2).count(),
+            'year': str(years.year) + '-' + str(years.month) + '-' + str(years.day),
+            'claims_all_count': ClaimInternet.objects.filter(pub_date__year=years.year, pub_date__month=years.month, pub_date__day=years.day).count(),
+            'claims_completed_count': ClaimInternet.objects.filter(pub_date__year=years.year, pub_date__month=years.month, pub_date__day=years.day, status=True,).count(),
+            'claims_disclaim_count': ClaimInternet.objects.filter(pub_date__year=years.year, pub_date__month=years.month, pub_date__day=years.day, disclaimer=True,).count(),
+            'claims_uncompleted_count': ClaimInternet.objects.filter(pub_date__year=years.year, pub_date__month=years.month, pub_date__day=years.day, disclaimer=False, status=False, claims_group=1).count(),
+            'claims_given_to_plumber_count': ClaimInternet.objects.filter(pub_date__year=years.year, pub_date__month=years.month, pub_date__day=years.day, disclaimer=False, status=False, claims_group=2).count(),
          } for years in year_list]
         return HttpResponse(json.dumps(data))
 
 
 def claims_statistic_month(request):
+    today_year = datetime.date.today().year
+    today_month = datetime.date.today().month
     if request.is_ajax():
-        month_list = ClaimInternet.objects.dates('pub_date', 'month')
+        month_list = ClaimInternet.objects.filter(pub_date__year=today_year, pub_date__month=today_month).dates('pub_date', 'day')
         data = [{
-            'month': str(years.year) + '-' + str(years.month),
-            'claims_all_count': ClaimInternet.objects.filter(pub_date__year=years.year, pub_date__month=years.month).count(),
-            'claims_completed_count': ClaimInternet.objects.filter(pub_date__year=years.year, pub_date__month=years.month, status=True,).count(),
-            'claims_disclaim_count': ClaimInternet.objects.filter(pub_date__year=years.year, pub_date__month=years.month, disclaimer=True,).count(),
-            'claims_uncompleted_count': ClaimInternet.objects.filter(pub_date__year=years.year, pub_date__month=years.month, disclaimer=False, status=False, claims_group=1).count(),
-            'claims_given_to_plumber_count': ClaimInternet.objects.filter(pub_date__year=years.year, pub_date__month=years.month, disclaimer=False, status=False, claims_group=2).count(),
+            'month': str(years.year) + '-' + str(years.month) + '-' + str(years.day),
+            'claims_all_count': ClaimInternet.objects.filter(pub_date__year=years.year, pub_date__month=years.month, pub_date__day=years.day).count(),
+            'claims_completed_count': ClaimInternet.objects.filter(pub_date__year=years.year, pub_date__month=years.month, pub_date__day=years.day, status=True,).count(),
+            'claims_disclaim_count': ClaimInternet.objects.filter(pub_date__year=years.year, pub_date__month=years.month, pub_date__day=years.day, disclaimer=True,).count(),
+            'claims_uncompleted_count': ClaimInternet.objects.filter(pub_date__year=years.year, pub_date__month=years.month, pub_date__day=years.day, disclaimer=False, status=False, claims_group=1).count(),
+            'claims_given_to_plumber_count': ClaimInternet.objects.filter(pub_date__year=years.year, pub_date__month=years.month, pub_date__day=years.day, disclaimer=False, status=False, claims_group=2).count(),
          } for years in month_list]
         return HttpResponse(json.dumps(data))
 
 
 def claims_statistic_week(request):
     if request.is_ajax():
-        month_list = ClaimInternet.objects.dates('pub_date', 'day')
-        from datetime import timedelta
-        from django.utils import timezone
-        some_day_last_week = timezone.now().date() - timedelta(days=7)
-        monday_of_last_week = some_day_last_week - timedelta(days=(some_day_last_week.isocalendar()[2] - 1))
-        #print monday_of_last_week
-        monday_of_this_week = monday_of_last_week + timedelta(days=7)
-        #print monday_of_this_week
-        d1 = monday_of_last_week
-        d2 = monday_of_this_week
-        diff = monday_of_this_week - monday_of_last_week
-        for i in range(diff.days + 1):
-            week = (d1 + datetime.timedelta(i)).isoformat()
-            #print week
+        day_last_week = timezone.now().date() - timedelta(days=7)
+        day_this_week = day_last_week + timedelta(days=8)
+        month_list = ClaimInternet.objects.filter(pub_date__gte=day_last_week, pub_date__lte=day_this_week).dates('pub_date', 'day')
         data = [{
-            'day': str(years.year) + '-' + str(years.month) + '-' + str(years.day),
+            'week': str(years.year) + '-' + str(years.month) + '-' + str(years.day),
             'claims_all_count': ClaimInternet.objects.filter(pub_date__year=years.year, pub_date__month=years.month, pub_date__day=years.day).count(),
             'claims_completed_count': ClaimInternet.objects.filter(pub_date__year=years.year, pub_date__month=years.month, pub_date__day=years.day, status=True,).count(),
             'claims_disclaim_count': ClaimInternet.objects.filter(pub_date__year=years.year, pub_date__month=years.month, pub_date__day=years.day, disclaimer=True,).count(),
@@ -302,17 +308,13 @@ def claims_statistic_week(request):
          } for years in month_list]
         return HttpResponse(json.dumps(data))
 
-
-def claims_statistic_day(request):
+def current_claims_internet_statistic_ajax(request):
     if request.is_ajax():
-        month_list = ClaimInternet.objects.dates('pub_date', 'day')
-        #print month_list
+        day_last_week = timezone.now().date() - timedelta(days=7)
+        day_this_week = day_last_week + timedelta(days=8)
+        month_list = ClaimInternet.objects.filter(pub_date__gte=day_last_week, pub_date__lte=day_this_week).dates('pub_date', 'day')
         data = [{
-            'day': str(years.year) + '-' + str(years.month) + '-' + str(years.day),
-            'claims_all_count': ClaimInternet.objects.filter(pub_date__year=years.year, pub_date__month=years.month, pub_date__day=years.day).count(),
-            'claims_completed_count': ClaimInternet.objects.filter(pub_date__year=years.year, pub_date__month=years.month, pub_date__day=years.day, status=True,).count(),
-            'claims_disclaim_count': ClaimInternet.objects.filter(pub_date__year=years.year, pub_date__month=years.month, pub_date__day=years.day, disclaimer=True,).count(),
-            'claims_uncompleted_count': ClaimInternet.objects.filter(pub_date__year=years.year, pub_date__month=years.month, pub_date__day=years.day, disclaimer=False, status=False, claims_group=1).count(),
-            'claims_given_to_plumber_count': ClaimInternet.objects.filter(pub_date__year=years.year, pub_date__month=years.month, pub_date__day=years.day, disclaimer=False, status=False, claims_group=2).count(),
-         } for years in month_list]
+            'label': 'statistics',
+            'value': ClaimInternet.objects.filter(status=False, claims_group=1).count(),
+         }]
         return HttpResponse(json.dumps(data))

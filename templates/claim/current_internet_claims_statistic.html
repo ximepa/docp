@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block extra_head %}
+    <link href="{% static 'claim/css/morris.css' %}" rel="stylesheet">
+{% endblock %}
+{% block scripts %}
+    <script src="{% static 'claim/js/raphael.min.js' %}"></script>
+    <script src="{% static 'claim/js/morris.js' %}"></script>
+    <script>
+        $(document).ready(function($) {
+            var data = [];
+            var _chart_current = Morris.Donut({
+                // ID of the element in which to draw the chart.
+                element: 'current_inet_claims',
+                // Chart data records -- each entry in this array corresponds to a point on
+                // the chart.
+                data: data
+            });
+
+            $.ajax({
+                type: "GET",
+                async: false,
+                url: '{% url 'claim:current_claims_internet_statistic_ajax' %}',
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                success: function(data) {
+                    console.log(data);
+                    _chart_current.setData(data);
+                }
+            });
+        });
+    </script>
+{% endblock %}
+{% block content %}
+    <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-16 main">
+            <ol class="breadcrumb">
+                <li><a href="{% url 'claim:index' %}">Home</a></li>
+                <li class="active">Статистика</li>
+            </ol>
+            <div id="statistics" class="page-header">
+              <h1><small>Графіки інтернет заявок</small></h1>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">Графік за рік</div>
+                <div class="panel-body">
+                    <div id="current_inet_claims" style="height: 250px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
