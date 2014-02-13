@@ -1,39 +1,32 @@
-{% extends 'base.html' %}
+{% extends 'layout.html' %}
 {% load staticfiles %}
 {% block content %}
-    <div class="row">
-        <div class="col-xs-12 col-sm-12 col-md-16 main">
-            <ol class="breadcrumb">
-                <li class="active">Home</li>
-                <li></li>
-            </ol>
-            <h1>Виберіть пунк для перегляду</h1>
-            <div class="list-group">
-                <a href="{% url 'claim:claims_internet' %}" class="list-group-item">
-                    Заявки Інтернет {{ main }}
-                    <span class="glyphicon glyphicon-chevron-right"></span>
-                    <span class="badge">Невиконані - {{ claim_internet_count_sf }}</span>
-                    <span class="badge">Виконані - {{ claim_internet_count_st }}</span>
-                    <span class="badge">Всі - {{ claim_internet_count_all }}</span>
-                </a>
-                <a href="#" class="list-group-item">Заявки КТБ
-                    <span class="glyphicon glyphicon-chevron-right"></span>
-                    <span class="badge badge-primary">14</span>
-                </a>
-                <a href="{% url 'planning:index' %}" class="list-group-item">Планування підключок
-                    <span class="glyphicon glyphicon-chevron-right"></span>
-                    <span class="badge">5</span>
-                </a>
-                <a href="/manual/" class="list-group-item">
-                    Мануали
-                    <span class="badge">Всі - {{ manual }}</span>
-                </a>
-                <br>
-                <br>
-                {% for key, value in a.items %}
-                    { '{{ key }}': '{{ value }}', value: 20 },
-                {% endfor %}
-            </div>
-        </div>
-    </div>
+<ol class="breadcrumb">
+    <li class="active">Home</li>
+    <li></li>
+</ol>
+<h1>Виберіть пунк для перегляду</h1>
+<div class="list-group">
+    <a href="{% url 'claim:claims_internet' %}" class="list-group-item">
+        Заявки Інтернет {{ main }}
+        <span class="glyphicon glyphicon-chevron-right"></span>
+        <span class="badge">Невиконані - {{ claim_internet_count_sf }}</span>
+        <span class="badge">Виконані - {{ claim_internet_count_st }}</span>
+        <span class="badge">Всі - {{ claim_internet_count_all }}</span>
+    </a>
+    <a href="#" class="list-group-item">Заявки КТБ
+        <span class="glyphicon glyphicon-chevron-right"></span>
+        <span class="badge badge-primary">14</span>
+    </a>
+    <a href="{% url 'planning:index' %}" class="list-group-item">Планування підключок
+        <span class="glyphicon glyphicon-chevron-right"></span>
+        <span class="badge">5</span>
+    </a>
+    <a href="/manual/" class="list-group-item">
+        Мануали
+        <span class="badge">Всі - {{ manual }}</span>
+    </a>
+    <br>
+    <br>
+</div>
 {% endblock %}

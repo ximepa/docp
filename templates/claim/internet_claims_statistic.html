@@ -1,11 +1,9 @@
-{% extends 'base.html' %}
+{% extends 'layout.html' %}
 {% load staticfiles %}
-{% block extra_head %}
-    <link href="{% static 'claim/css/morris.css' %}" rel="stylesheet">
-{% endblock %}
 {% block scripts %}
     <script src="{% static 'claim/js/raphael.min.js' %}"></script>
     <script src="{% static 'claim/js/morris.js' %}"></script>
+    <script src="{% static 'claim/js/scripts.js' %}"></script>
     <script>
         $(document).ready(function($) {
             var data = []
@@ -115,14 +113,18 @@
 {% endblock %}
 {% block content %}
     <div class="row">
-        <div class="col-xs-12 col-sm-12 col-md-16 main">
+        <div class="col-xs-12 col-sm-12 col-md-12">
             <ol class="breadcrumb">
                 <li><a href="{% url 'claim:index' %}">Home</a></li>
                 <li class="active">Статистика</li>
             </ol>
             <div id="statistics" class="page-header">
-              <h1><small>Графіки інтернет заявок</small></h1>
+                <h1><small>Графіки інтернет заявок</small></h1>
             </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-6 col-sm-6 col-md-6">
             <div class="panel panel-default">
                 <div class="panel-heading">Графік за рік</div>
                 <div class="panel-body">
@@ -130,15 +132,17 @@
                 </div>
             </div>
             <div class="panel panel-default">
-                <div class="panel-heading">Графік за місяць</div>
-                <div class="panel-body">
-                    <div id="claims_per_month" style="height: 250px;"></div>
-                </div>
-            </div>
-            <div class="panel panel-default">
                 <div class="panel-heading">Графік за тиждень</div>
                 <div class="panel-body">
                     <div id="claims_per_week" style="height: 250px;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-6 col-sm-6 col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">Графік за місяць</div>
+                <div class="panel-body">
+                    <div id="claims_per_month" style="height: 250px;"></div>
                 </div>
             </div>
         </div>

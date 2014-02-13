@@ -23,7 +23,6 @@ a.popover_links {
 
 .well {
     margin-bottom: 0px;
-    margin-top: -20px;
 }
 
 .list-group-item {
@@ -94,4 +93,8 @@ html {
 
 #sec2 {
     float: left;
+}
+
+.main-content {
+    margin-top: 60px;
 }

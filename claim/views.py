@@ -42,9 +42,9 @@ def internet_claims_statistic(request):
         return HttpResponseRedirect('/login/')
 
 
-def current_internet_claims_statistic_view(request):
+def workers_internet_statistic_view(request):
     if request.user.is_authenticated():
-        return render_to_response('current_internet_claims_statistic.html', {
+        return render_to_response('workers_inet_stats.html', {
                         'user': request.user,
                     }, context_instance=RequestContext(request))
     else:
@@ -308,7 +308,7 @@ def claims_statistic_week(request):
          } for years in month_list]
         return HttpResponse(json.dumps(data))
 
-def current_claims_internet_statistic_ajax(request):
+def workers_internet_statistic_ajax(request):
     if request.is_ajax():
         day_last_week = timezone.now().date() - timedelta(days=7)
         day_this_week = day_last_week + timedelta(days=8)
