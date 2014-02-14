@@ -6,51 +6,125 @@
     <script src="{% static 'claim/js/scripts.js' %}"></script>
     <script>
         $(document).ready(function($) {
-            var data = [];
-            var _chart_current = Morris.Donut({
-                // ID of the element in which to draw the chart.
-                element: 'current_inet_claims',
-                // Chart data records -- each entry in this array corresponds to a point on
-                // the chart.
-                data: $.ajax({
-                        type: "GET",
-                        async: false,
-                        url: '{% url 'claim:workers_internet_statistic_ajax' %}',
-                        contentType: "application/json; charset=utf-8",
-                        dataType: 'json',
-                        success: function(data) {
-                            console.log(data);
-                            _chart_current.setData(data);
-                        }
-                    })
-            });
+                var worker_1_chart_year = new Morris.Line({
+                    // ID of the element in which to draw the chart.
+                    element: 'worker_1_charts_year',
+                    // Chart data records -- each entry in this array corresponds to a point on
+                    // the chart.
+                    data:  [{% for stat in worker_stat_month %}
+                            {{ stat|safe }},
+                            {% endfor %}],
+                    xLabels: 'day',
+                    // The name of the data record attribute that contains x-values.
+                    xkey: 'year',
+                    // A list of names of data record attributes that contain y-values.
+                    ykeys: [
+                        'claims_all_count',
+                        'claims_completed_count',
+                        'claims_disclaim_count',
+                        'claims_uncompleted_count',
+                        'claims_given_to_plumber_count'
+                    ],
+                    // Labels for the ykeys -- will be displayed when you hover over the
+                    // chart.
+                    labels: ['Всі', 'Виконані', 'Відмова', 'Не виконані', 'Передано Паюнам']
+                });
 
-            $.ajax({
-                type: "GET",
-                async: false,
-                url: '{% url 'claim:workers_internet_statistic_ajax' %}',
-                contentType: "application/json; charset=utf-8",
-                dataType: 'json',
-                success: function(data) {
-                    console.log(data);
-                    _chart_current.setData(data);
-                }
-            });
         });
     </script>
 {% endblock %}
 {% block content %}
-<ol class="breadcrumb">
-    <li><a href="{% url 'claim:index' %}">Home</a></li>
-    <li class="active">Статистика</li>
-</ol>
-<div id="statistics" class="page-header">
-  <h1><small>Графіки інтернет заявок</small></h1>
+<div class="row">
+    <div class="col-xs-12 col-sm-12 col-md-12">
+        <ol class="breadcrumb">
+            <li><a href="{% url 'claim:index' %}">Home</a></li>
+            <li class="active">Статистика</li>
+        </ol>
+        <div id="statistics" class="page-header">
+            <h1><small>Графіки виконання заявок жалобщиками</small></h1>
+        </div>
+    </div>
 </div>
-<div class="panel panel-default">
-    <div class="panel-heading">Графік за рік</div>
-    <div class="panel-body">
-        <div id="current_inet_claims" style="height: 250px;"></div>
+<div class="row">
+    <div class="col-xs-6 col-sm-6 col-md-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                Фащевський Дмитро - Графік за рік
+                <div class="pull-right">
+                    <button class="btn btn-primary btn-xs" data-toggle="modal" data-target="#myModal">
+                        <i class="glyphicon glyphicon-info-sign"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- Modal -->
+            <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-sm">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                            <h4 class="modal-title" id="myModalLabel">Детальна інформація</h4>
+                        </div>
+                        <div class="modal-body">
+                            <ul class="list-group">
+                                <li class="list-group-item">
+                                    Виконано за рік <span class="badge">{{ worker_1_completed_year }}</span>
+                                </li>
+                                <li class="list-group-item">
+                                    Відмов за рік <span class="badge">{{ worker_1_disclaim_year }}</span>
+                                </li>
+                            </ul>
+
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal"><i class="glyphicon glyphicon-ok-circle"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div id="worker_1_charts_year" style="height: 250px;"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xs-6 col-sm-6 col-md-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                Фащевський Дмитро - Графік за місяць
+                <div class="pull-right">
+                    <button class="btn btn-primary btn-xs" data-toggle="modal" data-target="#myModal1">
+                        <i class="glyphicon glyphicon-info-sign"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- Modal -->
+            <div class="modal fade" id="myModal1" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-sm">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                            <h4 class="modal-title" id="myModalLabel">Детальна інформація</h4>
+                        </div>
+                        <div class="modal-body">
+                            <ul class="list-group">
+                                <li class="list-group-item">
+                                    Виконано за місяць <span class="badge">{{ worker_1_completed_month }}</span>
+                                </li>
+                                <li class="list-group-item">
+                                    Відмов за місяць <span class="badge">{{ worker_1_disclaim_month }}</span>
+                                </li>
+                            </ul>
+
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal"><i class="glyphicon glyphicon-ok-circle"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div id="worker_1_charts_month" style="height: 250px;"></div>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

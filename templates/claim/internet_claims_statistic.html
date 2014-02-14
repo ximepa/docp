@@ -108,6 +108,30 @@
                     _chart_week.setData(data);
                 }
             });
+
+            var _chart_day = Morris.Bar({
+              element: 'claims_day',
+              data: data,
+              xkey: 'day',
+              ykeys: [
+                    'claims_uncompleted_count',
+                    'claims_given_to_plumber_count'
+                ],
+              labels: ['Не виконані', 'Передано Паюнам']
+            });
+
+            $.ajax({
+                type: "GET",
+                async: false,
+                url: '{% url 'claim:claims_statistic_day' %}',
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                success: function(data) {
+                    console.log(data);
+                    _chart_day.setData(data);
+                }
+            });
+
         });
     </script>
 {% endblock %}
@@ -143,6 +167,14 @@
                 <div class="panel-heading">Графік за місяць</div>
                 <div class="panel-body">
                     <div id="claims_per_month" style="height: 250px;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-6 col-sm-6 col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">Графік поточної кількості заявок</div>
+                <div class="panel-body">
+                    <div id="claims_day" style="height: 250px;"></div>
                 </div>
             </div>
         </div>

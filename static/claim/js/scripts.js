@@ -27,14 +27,16 @@ $(document).ready(function($) {
     if(c) {
         if(c == "true") {
             hidden = true;
-
+            $('label.tree-toggler').parent().children('ul.tree').hide()
         }
     }
 
     $('label.tree-toggler').click(function () {
         hidden = !hidden
+
         setCookie('filter_hidden',hidden,365);
-        console.log(setCookie('filter_hidden',hidden,365))
+        var c = getCookie('filter_hidden')
+        console.log(c)
         $(this).parent().children('ul.tree').toggle(300);
     });
 });
