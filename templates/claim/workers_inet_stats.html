@@ -6,14 +6,13 @@
     <script src="{% static 'claim/js/scripts.js' %}"></script>
     <script>
         $(document).ready(function($) {
-                var worker_1_chart_year = new Morris.Line({
+            {% for worker in workers %}
+                var worker_{{ worker.pk }}_chart_year = new Morris.Line({
                     // ID of the element in which to draw the chart.
-                    element: 'worker_1_charts_year',
+                    element: 'worker_{{ worker.pk }}_charts_year',
                     // Chart data records -- each entry in this array corresponds to a point on
                     // the chart.
-                    data:  [{% for stat in worker_stat_month %}
-                            {{ stat|safe }},
-                            {% endfor %}],
+                    data: {{ worker.get_stats_inet_year|safe }},
                     xLabels: 'day',
                     // The name of the data record attribute that contains x-values.
                     xkey: 'year',
@@ -29,7 +28,30 @@
                     // chart.
                     labels: ['Всі', 'Виконані', 'Відмова', 'Не виконані', 'Передано Паюнам']
                 });
-
+            {% endfor %}
+            {% for worker in workers %}
+                var worker_{{ worker.pk }}_chart_month = new Morris.Line({
+                    // ID of the element in which to draw the chart.
+                    element: 'worker_{{ worker.pk }}_charts_month',
+                    // Chart data records -- each entry in this array corresponds to a point on
+                    // the chart.
+                    data: {{ worker.get_stats_inet_month|safe }},
+                    xLabels: 'day',
+                    // The name of the data record attribute that contains x-values.
+                    xkey: 'year',
+                    // A list of names of data record attributes that contain y-values.
+                    ykeys: [
+                        'claims_all_count',
+                        'claims_completed_count',
+                        'claims_disclaim_count',
+                        'claims_uncompleted_count',
+                        'claims_given_to_plumber_count'
+                    ],
+                    // Labels for the ykeys -- will be displayed when you hover over the
+                    // chart.
+                    labels: ['Всі', 'Виконані', 'Відмова', 'Не виконані', 'Передано Паюнам']
+                });
+            {% endfor %}
         });
     </script>
 {% endblock %}
@@ -47,9 +69,10 @@
 </div>
 <div class="row">
     <div class="col-xs-6 col-sm-6 col-md-6">
+        {% for worker in workers %}
         <div class="panel panel-default">
             <div class="panel-heading">
-                Фащевський Дмитро - Графік за рік
+                {{ worker.name }} - Графік за рік
                 <div class="pull-right">
                     <button class="btn btn-primary btn-xs" data-toggle="modal" data-target="#myModal">
                         <i class="glyphicon glyphicon-info-sign"></i>
@@ -82,14 +105,18 @@
                 </div>
             </div>
             <div class="panel-body">
-                <div id="worker_1_charts_year" style="height: 250px;"></div>
+
+                    <div id="worker_{{ worker.pk }}_charts_year" style="height: 250px;"></div>
+
             </div>
         </div>
+        {% endfor %}
     </div>
     <div class="col-xs-6 col-sm-6 col-md-6">
+        {% for worker in workers %}
         <div class="panel panel-default">
             <div class="panel-heading">
-                Фащевський Дмитро - Графік за місяць
+                {{ worker.name }} - Графік за місяць
                 <div class="pull-right">
                     <button class="btn btn-primary btn-xs" data-toggle="modal" data-target="#myModal1">
                         <i class="glyphicon glyphicon-info-sign"></i>
@@ -122,9 +149,10 @@
                 </div>
             </div>
             <div class="panel-body">
-                <div id="worker_1_charts_month" style="height: 250px;"></div>
+                <div id="worker_{{ worker.pk }}_charts_month" style="height: 250px;"></div>
             </div>
         </div>
+        {% endfor %}
     </div>
 </div>
 {% endblock %}

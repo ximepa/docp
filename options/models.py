@@ -63,9 +63,45 @@ class Worker(models.Model):
     is_active = models.BooleanField(default=False)
     work_type = models.ForeignKey('Work_type', verbose_name='Тип роботи')
     notebook_ip = models.CharField(max_length=200, blank=True)
+    show_in_graphs = models.BooleanField(default=True)
 
     def __unicode__(self):
         return self.name
+
+
+    def get_stats_inet_year(self):
+        import datetime
+        from claim.models import ClaimInternet
+        today_year = datetime.date.today().year
+        year_list = ClaimInternet.objects.filter(datetime__year=today_year).dates('datetime', 'day')
+        worker_stat_year = [{
+            'year': str(years.year) + '-' + str(years.month) + '-' + str(years.day),
+            'claims_all_count': ClaimInternet.objects.filter(datetime__year=years.year, datetime__month=years.month, datetime__day=years.day, who_do_id=self.pk).count(),
+            'claims_completed_count': ClaimInternet.objects.filter(datetime__year=years.year, datetime__month=years.month, datetime__day=years.day, status=True, who_do_id=self.pk).count(),
+            'claims_disclaim_count': ClaimInternet.objects.filter(datetime__year=years.year, datetime__month=years.month, datetime__day=years.day, disclaimer=True, who_do_id=self.pk).count(),
+            'claims_uncompleted_count': ClaimInternet.objects.filter(datetime__year=years.year, datetime__month=years.month, datetime__day=years.day, disclaimer=False, status=False, who_do_id=self.pk).count(),
+            'claims_given_to_plumber_count': ClaimInternet.objects.filter(datetime__year=years.year, datetime__month=years.month, datetime__day=years.day, disclaimer=False, status=False, who_do_id=self.pk).count(),
+            'id': int(self.pk)
+         } for years in year_list]
+        return worker_stat_year
+
+
+    def get_stats_inet_month(self):
+        import datetime
+        from claim.models import ClaimInternet
+        today_year = datetime.date.today().year
+        today_month = datetime.date.today().month
+        year_list = ClaimInternet.objects.filter(datetime__year=today_year, datetime__month=today_month).dates('datetime', 'day')
+        worker_stat_month = [{
+            'year': str(years.year) + '-' + str(years.month) + '-' + str(years.day),
+            'claims_all_count': ClaimInternet.objects.filter(datetime__year=years.year, datetime__month=years.month, datetime__day=years.day, who_do_id=self.pk).count(),
+            'claims_completed_count': ClaimInternet.objects.filter(datetime__year=years.year, datetime__month=years.month, datetime__day=years.day, status=True, who_do_id=self.pk).count(),
+            'claims_disclaim_count': ClaimInternet.objects.filter(datetime__year=years.year, datetime__month=years.month, datetime__day=years.day, disclaimer=True, who_do_id=self.pk).count(),
+            'claims_uncompleted_count': ClaimInternet.objects.filter(datetime__year=years.year, datetime__month=years.month, datetime__day=years.day, disclaimer=False, status=False, who_do_id=self.pk).count(),
+            'claims_given_to_plumber_count': ClaimInternet.objects.filter(datetime__year=years.year, datetime__month=years.month, datetime__day=years.day, disclaimer=False, status=False, who_do_id=self.pk).count(),
+            'id': int(self.pk)
+         } for years in year_list]
+        return worker_stat_month
 
     class Meta:
         ordering = ('name',)

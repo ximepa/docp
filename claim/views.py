@@ -50,31 +50,15 @@ def workers_internet_statistic_view(request):
         worker_1_completed_month = ClaimInternet.objects.filter(datetime__year=today_year, datetime__month=today_month, who_do_id=1, status=True)
         worker_1_disclaim_year = ClaimInternet.objects.filter(datetime__year=today_year, who_do_id=1, status=False, disclaimer=True)
         worker_1_disclaim_month = ClaimInternet.objects.filter(datetime__year=today_year, datetime__month=today_month, who_do_id=1, status=False, disclaimer=True)
-        today_year = datetime.date.today().year
-        today_month = datetime.date.today().month
-        workers = Worker.objects.filter(work_type_id=1)
+        workers = Worker.objects.filter(work_type=1, show_in_graphs=True)
         for worker in workers:
-            print worker.id
-            print worker.name
-            year_list = ClaimInternet.objects.filter(datetime__year=today_year, datetime__month=today_month).dates('datetime', 'day')
-            print year_list
-            worker_stat_month = [{
-                'year': str(years.year) + '-' + str(years.month) + '-' + str(years.day),
-                'claims_all_count': ClaimInternet.objects.filter(datetime__year=years.year, datetime__month=years.month, datetime__day=years.day, who_do_id=worker.id).count(),
-                'claims_completed_count': ClaimInternet.objects.filter(datetime__year=years.year, datetime__month=years.month, datetime__day=years.day, status=True, who_do_id=worker.id,).count(),
-                'claims_disclaim_count': ClaimInternet.objects.filter(datetime__year=years.year, datetime__month=years.month, datetime__day=years.day, disclaimer=True, who_do_id=worker.id,).count(),
-                'claims_uncompleted_count': ClaimInternet.objects.filter(datetime__year=years.year, datetime__month=years.month, datetime__day=years.day, disclaimer=False, status=False, claims_group=1, who_do_id=worker.id).count(),
-                'claims_given_to_plumber_count': ClaimInternet.objects.filter(datetime__year=years.year, datetime__month=years.month, datetime__day=years.day, disclaimer=False, status=False, claims_group=2, who_do_id=worker.id).count(),
-                'id': int(worker.pk)
-             } for years in year_list]
-        print worker_stat_month
+            print worker.get_stats_inet_month()
         return render_to_response('workers_inet_stats.html', {
                         'user': request.user,
                         'worker_1_completed_year': worker_1_completed_year.count(),
                         'worker_1_completed_month': worker_1_completed_month.count(),
                         'worker_1_disclaim_year': worker_1_disclaim_year.count(),
                         'worker_1_disclaim_month': worker_1_disclaim_month.count(),
-                        'worker_stat_month': worker_stat_month,
                         'workers': workers,
                     }, context_instance=RequestContext(request))
     else:

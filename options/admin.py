@@ -14,8 +14,8 @@ class DomAdmin(admin.ModelAdmin):
 
 class WorkerAdmin(admin.ModelAdmin):
     save_on_top = True
-    list_display = ('name', 'is_active', 'work_type', 'notebook_ip')
-    fields = ('name', 'is_active', 'work_type', 'notebook_ip')
+    list_display = ('name', 'is_active', 'work_type', 'notebook_ip', 'show_in_graphs',)
+    fields = ('name', 'is_active', 'work_type', 'notebook_ip', 'show_in_graphs',)
     class Media:
     #    css = {
     #        "all": ("my_styles.css",)
