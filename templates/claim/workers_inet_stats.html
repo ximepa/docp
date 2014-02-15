@@ -7,29 +7,6 @@
     <script>
         $(document).ready(function($) {
             {% for worker in workers %}
-                var worker_{{ worker.pk }}_chart_year = new Morris.Line({
-                    // ID of the element in which to draw the chart.
-                    element: 'worker_{{ worker.pk }}_charts_year',
-                    // Chart data records -- each entry in this array corresponds to a point on
-                    // the chart.
-                    data: {{ worker.get_stats_inet_year|safe }},
-                    xLabels: 'day',
-                    // The name of the data record attribute that contains x-values.
-                    xkey: 'year',
-                    // A list of names of data record attributes that contain y-values.
-                    ykeys: [
-                        'claims_all_count',
-                        'claims_completed_count',
-                        'claims_disclaim_count',
-                        'claims_uncompleted_count',
-                        'claims_given_to_plumber_count'
-                    ],
-                    // Labels for the ykeys -- will be displayed when you hover over the
-                    // chart.
-                    labels: ['Всі', 'Виконані', 'Відмова', 'Не виконані', 'Передано Паюнам']
-                });
-            {% endfor %}
-            {% for worker in workers %}
                 var worker_{{ worker.pk }}_chart_month = new Morris.Line({
                     // ID of the element in which to draw the chart.
                     element: 'worker_{{ worker.pk }}_charts_month',
@@ -52,35 +29,60 @@
                     labels: ['Всі', 'Виконані', 'Відмова', 'Не виконані', 'Передано Паюнам']
                 });
             {% endfor %}
+            {% for worker in workers %}
+                var worker_{{ worker.pk }}_chart_week = new Morris.Line({
+                    // ID of the element in which to draw the chart.
+                    element: 'worker_{{ worker.pk }}_charts_week',
+                    // Chart data records -- each entry in this array corresponds to a point on
+                    // the chart.
+                    data: {{ worker.get_stats_inet_week|safe }},
+                    xLabels: 'day',
+                    // The name of the data record attribute that contains x-values.
+                    xkey: 'week',
+                    // A list of names of data record attributes that contain y-values.
+                    ykeys: [
+                        'claims_all_count',
+                        'claims_completed_count',
+                        'claims_disclaim_count',
+                        'claims_uncompleted_count',
+                        'claims_given_to_plumber_count'
+                    ],
+                    // Labels for the ykeys -- will be displayed when you hover over the
+                    // chart.
+                    labels: ['Всі', 'Виконані', 'Відмова', 'Не виконані', 'Передано Паюнам']
+                });
+            {% endfor %}
         });
     </script>
 {% endblock %}
 {% block content %}
+<div class="preload"><img src="{% static 'claim/img/KUJoe.gif' %}">
+</div>
 <div class="row">
     <div class="col-xs-12 col-sm-12 col-md-12">
         <ol class="breadcrumb">
             <li><a href="{% url 'claim:index' %}">Home</a></li>
             <li class="active">Статистика</li>
         </ol>
-        <div id="statistics" class="page-header">
-            <h1><small>Графіки виконання заявок жалобщиками</small></h1>
-        </div>
     </div>
 </div>
 <div class="row">
     <div class="col-xs-6 col-sm-6 col-md-6">
+        <div id="statistics_year" class="page-header">
+            <h1><small>Графіки виконання заявок за місяць</small></h1>
+        </div>
         {% for worker in workers %}
         <div class="panel panel-default">
             <div class="panel-heading">
-                {{ worker.name }} - Графік за рік
+                <i class="glyphicon glyphicon-user"></i> {{ worker.name }}
                 <div class="pull-right">
-                    <button class="btn btn-primary btn-xs" data-toggle="modal" data-target="#myModal">
+                    <button class="btn btn-primary btn-xs" data-toggle="modal" data-target="#myModal{{ worker.pk }}">
                         <i class="glyphicon glyphicon-info-sign"></i>
                     </button>
                 </div>
             </div>
             <!-- Modal -->
-            <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal fade" id="myModal{{ worker.pk }}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-sm">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -90,10 +92,13 @@
                         <div class="modal-body">
                             <ul class="list-group">
                                 <li class="list-group-item">
-                                    Виконано за рік <span class="badge">{{ worker_1_completed_year }}</span>
+                                    Виконано за весь час <span class="label label-primary pull-right">{{ worker.get_stat_inet_all }}</span>
                                 </li>
                                 <li class="list-group-item">
-                                    Відмов за рік <span class="badge">{{ worker_1_disclaim_year }}</span>
+                                    Виконано за рік <span class="label label-primary pull-right">{{ worker.get_stat_inet_year }}</span>
+                                </li>
+                                <li class="list-group-item">
+                                    Виконано за місяць <span class="label label-primary pull-right">{{ worker.get_stat_inet_month }}</span>
                                 </li>
                             </ul>
 
@@ -106,25 +111,28 @@
             </div>
             <div class="panel-body">
 
-                    <div id="worker_{{ worker.pk }}_charts_year" style="height: 250px;"></div>
+                    <div id="worker_{{ worker.pk }}_charts_month" style="height: 250px;"></div>
 
             </div>
         </div>
         {% endfor %}
     </div>
     <div class="col-xs-6 col-sm-6 col-md-6">
+        <div id="statistics_month" class="page-header">
+            <h1><small>Графіки виконання заявок за тиждень</small></h1>
+        </div>
         {% for worker in workers %}
         <div class="panel panel-default">
             <div class="panel-heading">
-                {{ worker.name }} - Графік за місяць
+                <i class="glyphicon glyphicon-user"></i> {{ worker.name }}
                 <div class="pull-right">
-                    <button class="btn btn-primary btn-xs" data-toggle="modal" data-target="#myModal1">
+                    <button class="btn btn-primary btn-xs" data-toggle="modal" data-target="#myModal1{{ worker.pk }}">
                         <i class="glyphicon glyphicon-info-sign"></i>
                     </button>
                 </div>
             </div>
             <!-- Modal -->
-            <div class="modal fade" id="myModal1" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal fade" id="myModal1{{ worker.pk }}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-sm">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -134,10 +142,10 @@
                         <div class="modal-body">
                             <ul class="list-group">
                                 <li class="list-group-item">
-                                    Виконано за місяць <span class="badge">{{ worker_1_completed_month }}</span>
+                                    Виконано за тиждень <span class="badge">{{ worker_1_completed_month }}</span>
                                 </li>
                                 <li class="list-group-item">
-                                    Відмов за місяць <span class="badge">{{ worker_1_disclaim_month }}</span>
+                                    Відмов за тиждень <span class="badge">{{ worker_1_disclaim_month }}</span>
                                 </li>
                             </ul>
 
@@ -149,7 +157,7 @@
                 </div>
             </div>
             <div class="panel-body">
-                <div id="worker_{{ worker.pk }}_charts_month" style="height: 250px;"></div>
+                <div id="worker_{{ worker.pk }}_charts_week" style="height: 250px;"></div>
             </div>
         </div>
         {% endfor %}

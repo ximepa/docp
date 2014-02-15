@@ -21,6 +21,12 @@ function getCookie(c_name) {
 
 $(document).ready(function($) {
 
+    $(function() {
+        $(".preload").fadeOut(2000, function() {
+
+        });
+    });
+
     var hidden = false
     var c = getCookie('filter_hidden')
     console.log(c)

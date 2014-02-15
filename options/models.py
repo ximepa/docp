@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 from django.db import models
+from datetime import timedelta
+from django.utils import timezone
+import datetime
 
 
 class Dom(models.Model):
@@ -68,9 +71,7 @@ class Worker(models.Model):
     def __unicode__(self):
         return self.name
 
-
     def get_stats_inet_year(self):
-        import datetime
         from claim.models import ClaimInternet
         today_year = datetime.date.today().year
         year_list = ClaimInternet.objects.filter(datetime__year=today_year).dates('datetime', 'day')
@@ -85,9 +86,7 @@ class Worker(models.Model):
          } for years in year_list]
         return worker_stat_year
 
-
     def get_stats_inet_month(self):
-        import datetime
         from claim.models import ClaimInternet
         today_year = datetime.date.today().year
         today_month = datetime.date.today().month
@@ -97,11 +96,48 @@ class Worker(models.Model):
             'claims_all_count': ClaimInternet.objects.filter(datetime__year=years.year, datetime__month=years.month, datetime__day=years.day, who_do_id=self.pk).count(),
             'claims_completed_count': ClaimInternet.objects.filter(datetime__year=years.year, datetime__month=years.month, datetime__day=years.day, status=True, who_do_id=self.pk).count(),
             'claims_disclaim_count': ClaimInternet.objects.filter(datetime__year=years.year, datetime__month=years.month, datetime__day=years.day, disclaimer=True, who_do_id=self.pk).count(),
-            'claims_uncompleted_count': ClaimInternet.objects.filter(datetime__year=years.year, datetime__month=years.month, datetime__day=years.day, disclaimer=False, status=False, who_do_id=self.pk).count(),
-            'claims_given_to_plumber_count': ClaimInternet.objects.filter(datetime__year=years.year, datetime__month=years.month, datetime__day=years.day, disclaimer=False, status=False, who_do_id=self.pk).count(),
+            'claims_uncompleted_count': ClaimInternet.objects.filter(datetime__year=years.year, datetime__month=years.month, datetime__day=years.day, disclaimer=False, status=False, who_do_id=self.pk, claims_group=1).count(),
+            'claims_given_to_plumber_count': ClaimInternet.objects.filter(datetime__year=years.year, datetime__month=years.month, datetime__day=years.day, disclaimer=False, status=False, who_do_id=self.pk, claims_group=2).count(),
             'id': int(self.pk)
          } for years in year_list]
         return worker_stat_month
+
+    def get_stats_inet_week(self):
+        from claim.models import ClaimInternet
+        day_last_week = timezone.now().date() - timedelta(days=7)
+        day_this_week = day_last_week + timedelta(days=8)
+        week_list = ClaimInternet.objects.filter(datetime__gte=day_last_week, datetime__lte=day_this_week).dates('datetime', 'day')
+        worker_stat_week = [{
+            'week': str(week.year) + '-' + str(week.month) + '-' + str(week.day),
+            'claims_all_count': ClaimInternet.objects.filter(pub_date__year=week.year, pub_date__month=week.month, pub_date__day=week.day, who_do_id=self.pk).count(),
+            'claims_completed_count': ClaimInternet.objects.filter(pub_date__year=week.year, pub_date__month=week.month, pub_date__day=week.day, status=True, who_do_id=self.pk).count(),
+            'claims_disclaim_count': ClaimInternet.objects.filter(pub_date__year=week.year, pub_date__month=week.month, pub_date__day=week.day, disclaimer=True, who_do_id=self.pk).count(),
+            'claims_uncompleted_count': ClaimInternet.objects.filter(pub_date__year=week.year, pub_date__month=week.month, pub_date__day=week.day, disclaimer=False, status=False, claims_group=1, who_do_id=self.pk).count(),
+            'claims_given_to_plumber_count': ClaimInternet.objects.filter(pub_date__year=week.year, pub_date__month=week.month, pub_date__day=week.day, disclaimer=False, status=False, claims_group=2, who_do_id=self.pk).count(),
+            'id': int(self.pk)
+         } for week in week_list]
+        return worker_stat_week
+
+    def get_stat_inet_all(self):
+        from claim.models import ClaimInternet
+        completed_all = ClaimInternet.objects.filter(who_do_id=self.pk, status=True).count()
+        print completed_all
+        return completed_all
+
+    def get_stat_inet_year(self):
+        from claim.models import ClaimInternet
+        today_year = datetime.date.today().year
+        completed_year = ClaimInternet.objects.filter(datetime__year=today_year, who_do_id=self.pk, status=True).count()
+        print completed_year
+        return completed_year
+
+    def get_stat_inet_month(self):
+        from claim.models import ClaimInternet
+        today_year = datetime.date.today().year
+        today_month = datetime.date.today().month
+        completed_month = ClaimInternet.objects.filter(datetime__year=today_year, datetime__month=today_month, who_do_id=self.pk, status=True).count()
+        print completed_month
+        return completed_month
 
     class Meta:
         ordering = ('name',)
