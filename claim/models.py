@@ -33,6 +33,10 @@ class ClaimInternet(models.Model):
     def __unicode__(self):
         return self.vyl.sorting
 
+    @models.permalink
+    def get_absolute_url(self):
+        return ('claim:claims_internet', [self.pk])
+
     def get_json(self):
         return {
             'id': self.pk,

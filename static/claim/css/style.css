@@ -1,26 +1,18 @@
 .container {
     max-width: 1500px;
 }
-
-.table {
-    border: #d4d4d4 solid 1px;
+.table th, .table td {
+    padding: 6px;
 }
-
 .full-width {
     width: 100%;
 }
 body {
-    /*background: url("/static/claim/img/bg.png") repeat scroll 0% 0% transparent;*/
-    font: 75% 'Lucida Sans Unicode','Lucida Grande',arial,helvetica,sans-serif;
+    font: 12px 'Lucida Sans Unicode','Lucida Grande',arial,helvetica,sans-serif;
 }
-.navbar {
-    position: static;
-}
-
 a.popover_links {
     color: #555555;
 }
-
 .well {
     margin-bottom: 0px;
 }
@@ -112,3 +104,31 @@ html {
 .dropdown-submenu>a:after{display:block;content:" ";float:right;width:0;height:0;border-color:transparent;border-style:solid;border-width:5px 0 5px 5px;border-left-color:#cccccc;margin-top:5px;margin-right:-10px;}
 .dropdown-submenu:hover>a:after{border-left-color:#ffffff;}
 .dropdown-submenu.pull-left{float:none;}.dropdown-submenu.pull-left>.dropdown-menu{left:-100%;margin-left:10px;-webkit-border-radius:6px 0 6px 6px;-moz-border-radius:6px 0 6px 6px;border-radius:6px 0 6px 6px;}
+
+.filter-submenu {
+    margin-left: 15px;
+    margin-right: 15px;
+}
+
+.low_importance {
+    color: green;
+}
+.high_importance {
+    color: #ff0000;
+}
+
+#result_list thead {
+    background-color: #FAFAFA;
+    background-image: linear-gradient(to bottom, #FFFFFF, #F2F2F2);
+    background-repeat: repeat-x;
+}
+
+#result_list td {
+    background-color: #FAFAFA;
+    background-image: linear-gradient(to bottom, #FFFFFF, #F2F2F2);
+    background-repeat: repeat-x;
+}
+.action-checkbox-column, .action-checkbox {
+    text-align: center;
+}
+

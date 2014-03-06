@@ -42,12 +42,14 @@ STATUS_FILTER_CHOISES = (
 
 
 class InternetFilterForm(forms.Form):
-    status = forms.ChoiceField(choices=STATUS_FILTER_CHOISES, initial='0', widget=forms.Select(attrs={'class': 'selectpicker'}),)
+    status = forms.ChoiceField(choices=STATUS_FILTER_CHOISES, initial='0', widget=forms.RadioSelect(attrs={'onclick': 'document.getElementById("filter_form").submit();'}),)
     worker = forms.ModelChoiceField(queryset=Worker.objects.all().filter(is_active=True, work_type__id=1),
-                                            widget=forms.Select(attrs={'class': 'selectpicker show-tick',}))
-    search = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control input-lg'},))
+                                            widget=forms.RadioSelect(attrs={'onclick': 'document.getElementById("filter_form").submit();'}))
+    search = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': u'Пошук'},))
     #page = forms.HiddenInput()
-
+    def as_url_args(self):
+        import urllib
+        return urllib.urlencode(self.status)
 
 class PrintFilterForm(forms.Form):
     status = forms.ChoiceField(choices=STATUS_FILTER_CHOISES, initial='0', widget=forms.Select(attrs={'class': 'selectpicker'}),)

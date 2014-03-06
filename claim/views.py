@@ -53,9 +53,9 @@ def workers_internet_statistic_view(request):
         return HttpResponseRedirect('/login/')
 
 
-def logout(request):
-    logout(request)
-    return HttpResponseRedirect('/')
+# def logout(request):
+#     logout(request)
+#     return HttpResponseRedirect('/')
 
 
 LIST_HEADERS = (
@@ -75,6 +75,7 @@ LIST_HEADERS = (
 
 
 def claims_internet(request):
+    order_by = request.GET.get('order_by', '-pub_date')
     if request.method == 'GET':
         request.session['status'] = request.GET.get('status', 0)
         status = request.session.get('status', request.session.get('status', 0))
@@ -82,16 +83,7 @@ def claims_internet(request):
         worker = request.session.get('worker', request.session['worker'])
         request.session['search'] = request.GET.get('search')
         search = request.session.get('search', request.session['search'])
-        request.session['ot'] = request.GET.get('ot')
-        ot = request.session.get('ot', request.session['ot'])
-        request.session['o'] = request.GET.get('o')
-        o = request.session.get('o', request.session['o'])
-
-    getparams_headers = request.GET.copy()
-    getparams_headers.pop('ot', None)
-    getparams_headers.pop('o', None)
-    sort_headers = SortHeaders(request, LIST_HEADERS, default_order_field=6, default_order_type='desc', additional_params=getparams_headers.dict())
-    claims_list = ClaimInternet.objects.all().order_by(sort_headers.get_order_by())
+    claims_list = ClaimInternet.objects.all().order_by(order_by)
     if not status == 'None':
         claims_list = claims_list.filter(Q(status=status))
     if worker:
@@ -102,6 +94,7 @@ def claims_internet(request):
                                          Q(who_do__name__icontains=search) | Q(line_type__name__icontains=search) |
                                          Q(error__name__icontains=search)
                                          )
+    print claims_list.count()
     paginator = Paginator(claims_list, 50) # Show 25 contacts per page
     try:
         page = int(request.GET.get('page', '1'))
@@ -118,13 +111,10 @@ def claims_internet(request):
     filter_form = InternetFilterForm(initial={'status': status, 'worker': worker})
     return render(request, 'claims-internet/claims-list.html', {
                         'claims': claims,
-                        'ot': request.session['ot'],
-                        'o':request.session['o'],
                         'search': request.GET.get('search'),
-                        'status': request.session['status'],
+                        'status': status,
                         'worker': request.session['worker'],
                         'claims_count': claims_list.count(),
-                        'headers': list(sort_headers.headers()),
                         'user': request.user,
                         'filter_form': filter_form,
                     })

@@ -137,6 +137,7 @@ INSTALLED_APPS = (
     'planning',
     'manual',
     'south',
+    'django_tables2',
 )
 
 # A sample logging configuration. The only tangible logging

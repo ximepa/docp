@@ -1,83 +1,187 @@
 {% extends 'claims-internet/layout.html' %}
 {% load staticfiles %}
 {% load static_pages %}
+{% block title %}
+    Заявки - Інтернет
+{% endblock %}
+{% block extra_head %}
+{% endblock %}
 {% block scripts %}
-<script language="javascript">
-    $(document).ready(function () {
-
-    });
-</script>
-
+    <script language="javascript">
+        $(document).ready(function () {
+            var form = $('#submited')
+            console.log(form)
+            $("#filter_form").on("click", function () {
+                form.submit();
+            });
+            $("[data-toggle=popover]").popover({
+                html: true,
+                placement: 'bottom',
+                trigger: 'focus',
+                content: function() {
+                      return $('#filter_form').html();
+                    }
+            });
+        });
+    </script>
+{% endblock %}
+{% block navbar-content %}
+    <ul class="nav navbar-nav">
+        <li class="active"><a href="#">Link</a></li>
+        <li><a href="#">Link</a></li>
+        <form method="GET" class="navbar-form navbar-left" role="search" id="filter_form">
+            <div class="input-group">
+              <div class="input-group-btn">
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                    Фільтр <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" id="popover_content_wrapper">
+                    <li class="dropdown-submenu">
+                        <a tabindex="-1" href="#">Статус</a>
+                        <ul class="dropdown-menu">
+                            <li><div class="filter-submenu">{{ filter_form.status }}</div></li>
+                        </ul>
+                    </li>
+                    <li class="dropdown-submenu">
+                        <a tabindex="-1" href="#">Жалобщик</a>
+                        <ul class="dropdown-menu">
+                            <li class="dropdown-submenu"><div class="filter-submenu">{{ filter_form.worker }}</div></li>
+                        </ul>
+                    </li>
+                    <li class="divider"></li>
+                </ul>
+              </div><!-- /btn-group -->
+              {{ filter_form.search }}
+            </div><!-- /input-group -->
+        </form>
+    </ul>
 {% endblock %}
 {% block content %}
     <div class="row main-content">
         <div class="col-xs-12 col-sm-12 col-md-12">
-            <ol class="breadcrumb">
-                <li><a href="{% url 'claim:index' %}">Home</a></li>
-                <li class="active">Статистика</li>
-            </ol>
+            <table class="table table-striped table-hover" id="result_list">
+                <thead>
+                    <tr>
+                        <th class="action-checkbox-column" scope="col">
+                            <input type="checkbox" id="check_all">
+                        </th>
+                        <th>
+                            <a href="?{% url_replace request 'order_by' 'vyl' %}">Вул.</a>
+                        </th>
+                        <th>
+                            <a href="?{% url_replace request 'order_by' 'kv' %}">Кв.</a>
+                        </th>
+                        <th>
+                            <a href="?{% url_replace request 'order_by' 'login' %}">Логін</a>
+                        </th>
+                        <th>
+                            <a href="?{% url_replace request 'order_by' 'error' %}">Помилка</a>
+                        </th>
+                        <th>
+                            <a href="?{% url_replace request 'order_by' 'who_give' %}">Додав</a>
+                        </th>
+                        <th>
+                            <a href="?{% url_replace request 'order_by' 'pub_date' %}">дата створення</a>
+                        </th>
+                        <th>
+                            <a href="?{% url_replace request 'order_by' 'who_do' %}">Виконавець</a>
+                        </th>
+                        <th>
+                            Повтори
+                        </th>
+                        <th>
+                            <a href="?{% url_replace request 'order_by' 'line_type' %}">Тип лінії</a>
+                        </th>
+                        <th>
+                            Інфо
+                        </th>
+                        <th>
+                            Планування
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for claim in claims  %}
+                    {% if claim.importance_id == 1 %}
+                    <tr>
+                    {% elif claim.importance_id == 2 %}
+                    <tr style="color: green">
+                    {% else %}
+                    <tr style="color: red">
+                    {% endif %}
+                        <td class="action-checkbox">
+                            check
+                        </td>
+                        <td>
+                            {{ claim.vyl }}
+                        </td>
+                        <td>
+                            {{ claim.kv }}
+                        </td>
+                        <td>
+                            {{ claim.login }}
+                        </td>
+                        <td>
+                            {{ claim.error }}
+                        </td>
+                        <td>
+                            {{ claim.who_give }}
+                        </td>
+                        <td>
+                            {{ claim.pub_date }}
+                        </td>
+                        <td>
+                            {{ claim.who_do }}
+                        </td>
+                        <td>
+                            {{ claim.same_claim }}
+                        </td>
+                        <td>
+                            {{ claim.line_type }}
+                        </td>
+                        <td>
+                            {{ claim.same_claim }}
+                        </td>
+                        <td>
+                            На {{ claim.planning_date_from }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3">
+                            <div class="">
+                                <ul class="pagination">
+                                    {% if claims.has_previous %}
+                                        <li><a href="?{% url_replace_page request 'page' '1' %}">&laquo;&laquo;</a></li>
+                                        <li><a href="?{% url_replace_page request 'page' claims.previous_page_number %}">&laquo;</a></li>
+                                    {% else %}
+                                        <li class="disabled"><a href="#">&laquo;&laquo;</a></li>
+                                        <li class="disabled"><a href="#">&laquo;</a></li>
+                                    {% endif %}
+                                    <li><a href="#">Page {{ claims.number }} of {{ claims.paginator.num_pages }}</a></li>
+                                    {% if claims.has_next %}
+                                        <li><a href="?{% url_replace_page request 'page' claims.next_page_number %}">&raquo;</a></li>
+                                        <li><a href="?{% url_replace_page request 'page' claims.paginator.num_pages %}">&raquo;&raquo;</a></li>
+                                    {% else %}
+                                        <li class="disabled"><a href="#">&raquo;</a></li>
+                                        <li class="disabled"><a href="#">&raquo;&raquo;</a></li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </td>
+                        <td colspan="11">
+                            {{ claims_count }}
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
         </div>
     </div>
     <div class="row">
         <div class="col-xs-12 col-sm-12 col-md-12">
-            <div class="panel panel-default">
-                <div class="panel-body">
-                    <div class="row">
-                        <div class="col-xs-12 col-sm-12 col-md-12">
-                            <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu" style="display: block; position: static; margin-bottom: 5px; *width: 180px;">
-                              <li><a href="#">Action</a></li>
-                              <li><a href="#">Another action</a></li>
-                              <li><a href="#">Something else here</a></li>
-                              <li class="divider"></li>
-                              <li class="dropdown-submenu">
-                                <a tabindex="-1" href="#">More options</a>
-                                <ul class="dropdown-menu">
-                                  <li><a tabindex="-1" href="#">Second level</a></li>
-                                  <li class="dropdown-submenu">
-                                    <a href="#">More...</a>
-                                    <ul class="dropdown-menu">
-                                        <li><a href="#">3rd level</a></li>
-                                        <li><a href="#">3rd level</a></li>
-                                    </ul>
-                                  </li>
-                                  <li><a href="#">Second level</a></li>
-                                  <li><a href="#">Second level</a></li>
-                                </ul>
-                              </li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-xs-12 col-sm-12 col-md-12">
-                            <table class="table table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th>
-                                            asd
-                                        </th>
-                                        <th>
-                                            asd
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>
-                                            Basic panel example
-                                        </td>
-                                        <td>
-                                            Basic panel example
-                                        </td>
 
-                                    </tr>
-                                </tbody>
-
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
-
 {% endblock %}
